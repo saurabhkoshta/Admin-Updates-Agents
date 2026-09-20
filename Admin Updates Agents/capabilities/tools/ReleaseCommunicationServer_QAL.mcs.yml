@@ -1,0 +1,8 @@
+mcs.metadata:
+  componentName: Release Communication Server
+  description: The MRC MCP Server provides a unified, programmatic way for MCP-compatible AI clients to access trusted and up-to-date information that powers Microsoft AI at Work Roadmap
+kind: McpTool
+authMode: Invoker
+connectionReference: sample_adminupdatesagent.cr.shared_sample-5frele.publicreleaseconnection
+connectorId: /providers/Microsoft.PowerApps/apis/shared_sample-5frelease-20communication-20server-publicconnector
+operationId: InvokeServer

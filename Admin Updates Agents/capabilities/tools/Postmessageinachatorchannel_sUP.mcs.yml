@@ -1,0 +1,8 @@
+mcs.metadata:
+  componentName: Post message in a chat or channel
+  description: Posts a message to a chat or a channel
+kind: ConnectorTool
+authMode: Invoker
+connectionReference: sample_adminupdatesagent.cr.shared_teams
+connectorId: /providers/Microsoft.PowerApps/apis/shared_teams
+operationId: PostMessageToConversation

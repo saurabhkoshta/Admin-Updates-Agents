@@ -1,0 +1,8 @@
+mcs.metadata:
+  componentName: MCP-Server-for-Enterprise
+  description: A Model Context Protocol (MCP) server that enables AI assistants to securely interact with Microsoft Graph API for enterprise identity and access management operations.
+kind: McpTool
+authMode: Invoker
+connectionReference: sample_adminupdatesagent.cr.shared_sample-5fmcp-.publicenterpriseconnection
+connectorId: /providers/Microsoft.PowerApps/apis/shared_sample-5fmcp-2dserver-2dfor-2denterprise-publicconnector
+operationId: InvokeServer

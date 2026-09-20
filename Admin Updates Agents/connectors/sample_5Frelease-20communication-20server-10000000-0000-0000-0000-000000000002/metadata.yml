@@ -1,0 +1,21 @@
+{
+  "connectorid": "10000000-0000-0000-0000-000000000002",
+  "name": "sample_5Frelease-20communication-20server",
+  "displayname": "Release Communication Server",
+  "description": "The MRC MCP Server provides a unified, programmatic way for MCP-compatible AI clients to access trusted and up-to-date information that powers Microsoft AI at Work Roadmap",
+  "connectorinternalid": "shared_sample-5Frelease-20communication-20server-publicconnector",
+  "openapidefinition": "connectors/sample_5Frelease-20communication-20server-10000000-0000-0000-0000-000000000002/openapidefinition.json",
+  "connectionparameters": "connectors/sample_5Frelease-20communication-20server-10000000-0000-0000-0000-000000000002/connectionparameters.json",
+  "connectionparametersets": null,
+  "policytemplateinstances": "connectors/sample_5Frelease-20communication-20server-10000000-0000-0000-0000-000000000002/policytemplateinstances.json",
+  "iconbrandcolor": null,
+  "iconblob": "connectors/sample_5Frelease-20communication-20server-10000000-0000-0000-0000-000000000002/iconblob.png",
+  "connectortype": 1,
+  "statecode": 0,
+  "statuscode": 1,
+  "ismanaged": false,
+  "componentstate": 0,
+  "createdon": "2026-09-19T22:02:10Z",
+  "modifiedon": "2026-09-19T22:02:15Z",
+  "versionnumber": 6737649
+}

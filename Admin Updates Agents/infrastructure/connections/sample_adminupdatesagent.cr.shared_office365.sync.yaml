@@ -1,0 +1,3 @@
+connectionReferences:
+  - connectionReferenceLogicalName: sample_adminupdatesagent.cr.shared_office365
+    connectorId: /providers/Microsoft.PowerApps/apis/shared_office365

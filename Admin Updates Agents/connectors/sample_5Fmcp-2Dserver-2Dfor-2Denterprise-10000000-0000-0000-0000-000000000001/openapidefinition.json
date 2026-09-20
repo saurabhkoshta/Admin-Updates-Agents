@@ -1,0 +1,54 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "MCP-Server-for-Enterprise",
+    "description": "A Model Context Protocol (MCP) server that enables AI assistants to securely interact with Microsoft Graph API for enterprise identity and access management operations.",
+    "version": "1.0.0"
+  },
+  "host": "mcp.svc.cloud.microsoft",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/enterprise": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Immediate Response"
+          }
+        },
+        "x-ms-agentic-protocol": "mcp-streamable-1.0",
+        "operationId": "InvokeServer",
+        "summary": "MCP-Server-for-Enterprise",
+        "description": "A Model Context Protocol (MCP) server that enables AI assistants to securely interact with Microsoft Graph API for enterprise identity and access management operations."
+      }
+    }
+  },
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
+      "scopes": {
+        "api://e8c77dc2-69b3-43f4-bc51-3213c9d915b4/.default": "api://e8c77dc2-69b3-43f4-bc51-3213c9d915b4/.default"
+      },
+      "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize"
+    },
+    "oAuthClientCredentials": {
+      "type": "oauth2",
+      "flow": "application",
+      "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
+      "scopes": {
+        "api://e8c77dc2-69b3-43f4-bc51-3213c9d915b4/.default": "api://e8c77dc2-69b3-43f4-bc51-3213c9d915b4/.default"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2-auth": [
+        "api://e8c77dc2-69b3-43f4-bc51-3213c9d915b4/.default"
+      ]
+    }
+  ]
+}

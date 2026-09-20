@@ -1,0 +1,62 @@
+{
+  "token": {
+    "type": "oauthSetting",
+    "oAuthSettings": {
+      "identityProvider": "aad",
+      "clientId": "44a37776-6ae1-4d16-99b0-44ca005ffeb9",
+      "clientAssertionType": "GenericFederatedIdentityCredential",
+      "scopes": [
+        "api://e8c77dc2-69b3-43f4-bc51-3213c9d915b4/.default"
+      ],
+      "redirectMode": "GlobalPerConnector",
+      "redirectUrl": "https://global.consent.azure-apim.net/redirect/sample-5fmcp-2dserver-2dfor-2denterprise-publicconnector",
+      "properties": {
+        "IsFirstParty": "False",
+        "AzureActiveDirectoryResourceId": "https://mcp.svc.cloud.microsoft/enterprise/",
+        "IsOnbehalfofLoginSupported": true,
+        "FederatedIdentityCredentials": {
+          "Issuer": "https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/v2.0",
+          "Subject": "/replace-with-target-tenant-federated-identity-subject",
+          "Audience": "api://AzureADTokenExchange"
+        }
+      },
+      "customParameters": {
+        "LoginUri": {
+          "value": "https://login.microsoftonline.com"
+        },
+        "TenantId": {
+          "value": "00000000-0000-0000-0000-000000000000"
+        },
+        "ResourceUri": {
+          "value": "https://mcp.svc.cloud.microsoft/enterprise/"
+        },
+        "EnableOnbehalfOfLogin": {
+          "value": "false"
+        },
+        "grantType": {
+          "value": "authorization_code_with_federated_identity_credentials"
+        }
+      }
+    },
+    "uiDefinition": {
+      "displayName": "OAuth Connection",
+      "description": "OAuth Connection",
+      "constraints": {
+        "required": "true",
+        "hidden": "false"
+      }
+    }
+  },
+  "token:TenantId": {
+    "type": "string",
+    "metadata": {
+      "sourceType": "AzureActiveDirectoryTenant"
+    },
+    "uiDefinition": {
+      "constraints": {
+        "required": "false",
+        "hidden": "true"
+      }
+    }
+  }
+}

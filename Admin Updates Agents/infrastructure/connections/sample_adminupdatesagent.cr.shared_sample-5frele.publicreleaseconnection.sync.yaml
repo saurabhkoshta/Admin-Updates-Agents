@@ -1,0 +1,3 @@
+connectionReferences:
+  - connectionReferenceLogicalName: sample_adminupdatesagent.cr.shared_sample-5frele.publicreleaseconnection
+    connectorId: /providers/Microsoft.PowerApps/apis/shared_sample-5frelease-20communication-20server-publicconnector
