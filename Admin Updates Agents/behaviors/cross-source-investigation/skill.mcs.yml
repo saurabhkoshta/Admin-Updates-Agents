@@ -1,0 +1,6 @@
+mcs.metadata:
+  componentName: cross-source-investigation
+  description: Investigates Microsoft product changes, tenant impact, known issues, and guidance across connected MCP sources while preserving source authority.
+  schemaName: sample_adminupdatesagent.skill.cross-source-investigation
+kind: InlineAgentSkill
+authoringSource: Blank
