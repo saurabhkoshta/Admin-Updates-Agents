@@ -1,6 +1,6 @@
 mcs.metadata:
   componentName: Post weekly admin digest card
-  description: Posts the weekly Microsoft admin updates digest as an Adaptive Card to the Teams channel configured on the current subscription. Use this for Teams digest delivery instead of the plain message tool.
+  description: Posts the Admin Updates Agent weekly digest as an Adaptive Card to the Teams channel configured on the current subscription. Use this for Teams digest delivery instead of the plain message tool.
 kind: ConnectorTool
 authMode: Invoker
 connectionReference: sample_adminupdatesagent.cr.shared_teams

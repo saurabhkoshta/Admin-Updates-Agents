@@ -4,9 +4,9 @@ This guide is for administrators installing Admin Updates Agent from an exported
 
 ## 1. Download the solution
 
-Download the solution ZIP attached to the GitHub release you intend to install. Do not download the repository source ZIP from GitHub's **Code** menu. A source archive is not an importable Power Platform solution.
+Download [AdminUpdatesAgents_1_0_0_0.zip](solution/AdminUpdatesAgents_1_0_0_0.zip). Do not download the repository source ZIP from GitHub's **Code** menu. A source archive is not an importable Power Platform solution.
 
-This repository does not currently publish a solution release asset. The repository owner must export and attach the complete solution before this installation path is available to end users.
+The package is an unmanaged solution so administrators can inspect and adapt the reference implementation.
 
 ## 2. Prepare the environment
 
@@ -32,6 +32,17 @@ Import into a development environment first. Do not enable scheduled delivery ag
 
 ## 4. Configure connections
 
+The package contains no source-tenant connection instances or credentials. Bind or create every connection in the target environment.
+
+Before creating the MCP Server for Enterprise connection, replace these sanitized custom-connector placeholders with values for the target tenant:
+
+| Placeholder | Required value |
+| --- | --- |
+| `00000000-0000-0000-0000-000000000000` | Target Microsoft Entra tenant ID |
+| `/replace-with-target-tenant-federated-identity-subject` | Federated identity subject configured for the target connector |
+
+Alternatively, select the connector's service-principal authentication option and provide the target tenant's application details during connection creation. Never store a client secret in the solution or repository.
+
 Create and test these connections in the target environment:
 
 | Connection | Purpose |
@@ -49,7 +60,7 @@ Teams and Outlook are required only for delivery methods you enable.
 
 ## 5. Verify the subscription data model
 
-Digest features expect a user-owned Dataverse table named `Admin Digest Subscriptions`. The current behaviors refer to the source logical name `sample_admindigestsubscription`.
+Digest features use the imported user-owned Dataverse table named `Admin Digest Subscriptions`. Its sanitized logical name is `sample_admindigestsubscription`.
 
 The table must represent at least these values:
 
