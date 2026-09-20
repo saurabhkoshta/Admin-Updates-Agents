@@ -10,3 +10,9 @@
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Generated deployment profiles
+dist/
+
+# Private public-mirror sanitization values
+.private/

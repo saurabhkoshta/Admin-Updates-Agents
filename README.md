@@ -15,6 +15,15 @@ This is a community reference implementation. It is not an official Microsoft pr
 - Manage per-user weekly digest preferences in Dataverse.
 - Deliver filtered weekly digests through Microsoft Teams and email.
 
+## Deployment profiles
+
+Two deployment profiles are generated from the same source:
+
+- **Core:** complete research plus shared Teams or email digest delivery using fixed administrator configuration and no Dataverse.
+- **Personalized:** user-owned Dataverse subscriptions with per-admin products, schedules, time zones, and destinations.
+
+See [PROFILES.md](PROFILES.md) for the exact capability and dependency split.
+
 ## Evidence model
 
 ```mermaid
@@ -53,16 +62,22 @@ The agent preserves source-specific IDs, dates, status, scope, and links. It doe
 | `infrastructure/connections/` | Exported connection reference mappings |
 | `settings/` | Additional Copilot Studio settings |
 | `workflows/` | Reserved for workflow definitions; currently empty |
+| `profiles/` | Declarative file lists for simple and personalized builds |
+| `scripts/` | Profile build and sanitized public-history automation |
 
 ## Prerequisites
 
-- A Power Platform environment with Dataverse and Copilot Studio authoring access.
+- A Power Platform environment with Copilot Studio authoring access.
 - The Copilot Studio extension for Visual Studio Code.
 - Access to the MCP Server for Enterprise, Release Communication Server, and Microsoft Learn Docs MCP Server.
-- Microsoft Teams, Microsoft 365 Outlook, and Dataverse connections for digest features.
-- A user-owned `Admin Digest Subscriptions` Dataverse table and appropriate least-privilege security roles.
+- Microsoft Teams or Microsoft 365 Outlook connections for enabled delivery methods.
+- For the personalized profile only, Dataverse and a user-owned `Admin Digest Subscriptions` table with appropriate least-privilege security roles.
 
 See [SETUP.md](SETUP.md) for environment preparation and connection rebinding.
+
+## Repository histories
+
+Maintain tenant-bound source in a private repository and publish only a generated, sanitized history. See [HISTORY.md](HISTORY.md) for the migration and ongoing release process.
 
 ## Important portability notes
 
@@ -74,7 +89,7 @@ The repository does not currently include:
 - The scheduled `Daily-MC-Trigger` workflow referenced by the weekly digest behavior.
 - Local `.mcs` connection state, authentication tokens, or environment binding files.
 
-Cross-source research can be adapted independently. Subscription management and scheduled digest delivery require the missing Dataverse and workflow assets to be recreated or supplied separately.
+Cross-source research can be adapted independently. Simple scheduled delivery requires a fixed-configuration flow. Personalized subscriptions require the missing Dataverse and workflow assets to be recreated or supplied separately.
 
 ## Security
 

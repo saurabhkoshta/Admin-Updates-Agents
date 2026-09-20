@@ -1,0 +1,6 @@
+mcs.metadata:
+  componentName: core-admin-digest
+  description: Creates the core shared Microsoft admin digest with fixed administrator configuration and no Dataverse dependency.
+  schemaName: sample_adminupdatesagent.skill.core-admin-digest
+kind: InlineAgentSkill
+authoringSource: Blank
