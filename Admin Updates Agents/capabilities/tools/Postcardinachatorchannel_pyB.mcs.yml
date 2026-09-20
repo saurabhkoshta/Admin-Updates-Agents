@@ -1,0 +1,14 @@
+mcs.metadata:
+  componentName: Post weekly admin digest card
+  description: Posts the weekly Microsoft admin updates digest as an Adaptive Card to the configured Teams General channel. Use this for Teams digest delivery instead of the plain message tool.
+kind: ConnectorTool
+authMode: Invoker
+connectionReference: sample_adminupdatesagent.cr.shared_teams
+connectorId: /providers/Microsoft.PowerApps/apis/shared_teams
+operationId: PostCardToConversation
+toolInputs:
+  - name: poster
+    description: Always post as the Flow bot for unattended weekly digest delivery.
+
+  - name: location
+    description: Always post in a Microsoft Teams channel. Use team dd7052d0-2079-4bb3-a778-d2f996559aef and its General channel.

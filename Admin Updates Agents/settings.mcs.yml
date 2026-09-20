@@ -52,6 +52,6 @@ configuration:
     web:
       enableWebSearch: false
 
-publishedOn: 2026-09-20T07:18:37.0000000Z
+publishedOn: 2026-09-20T08:22:28.0000000Z
 template: cliagent-1.0.0
 language: 1033
