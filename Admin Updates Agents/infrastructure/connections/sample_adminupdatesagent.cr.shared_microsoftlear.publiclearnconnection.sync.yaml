@@ -1,0 +1,3 @@
+connectionReferences:
+  - connectionReferenceLogicalName: sample_adminupdatesagent.cr.shared_microsoftlear.publiclearnconnection
+    connectorId: /providers/Microsoft.PowerApps/apis/shared_microsoftlearndocsmcpserver

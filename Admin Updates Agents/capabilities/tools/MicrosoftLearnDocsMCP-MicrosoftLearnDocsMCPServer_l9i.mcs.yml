@@ -1,0 +1,8 @@
+mcs.metadata:
+  componentName: Microsoft Learn Docs MCP — Microsoft Learn Docs MCP Server
+  description: MCP Server to search Microsoft Learn content
+kind: McpTool
+authMode: Invoker
+connectionReference: sample_adminupdatesagent.cr.shared_microsoftlear.publiclearnconnection
+connectorId: /providers/Microsoft.PowerApps/apis/shared_microsoftlearndocsmcpserver
+operationId: microsoft_docs_search

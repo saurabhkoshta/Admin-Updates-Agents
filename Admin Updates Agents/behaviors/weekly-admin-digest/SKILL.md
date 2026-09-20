@@ -13,6 +13,7 @@ Create and automatically deliver a concise weekly digest of tenant-specific Micr
 - Each subscription supplies its selected products, enabled delivery methods, Teams destination, email recipients, schedule, and time zone.
 - Reporting window: the rolling seven days immediately before that subscription's scheduled run time.
 - Tenant source: `MCP-Server-for-Enterprise`.
+- Documentation source: `Microsoft Learn Docs MCP Server`.
 - Required filters: category equals `planForChange` or `preventOrFixIssue` AND tag equals `Admin impact`, with text comparisons case-insensitive.
 - Teams delivery tool: `Post weekly admin digest card`.
 - Email delivery tool: `Send an email (V2)`.
@@ -34,13 +35,15 @@ Never embed tenant, environment, connection, owner, Team, channel, recipient, sc
 8. Group included posts by category in this order: `planForChange`, then `preventOrFixIssue`. Within each category, group posts by `isMajorChange`, showing `Major: Yes` before `Major: No`. Treat only boolean `true` as `Major: Yes`; false or missing values are `Major: No`.
 9. Within each major-change group, sort posts by the nearest administrator action or rollout date when available, then by publication or last-updated date, newest first.
 10. For each post, preserve the Message Center ID, title, affected product or service, category, major-change status, status, published or updated date, rollout or action date, administrator impact, recommended action, and source link when returned by the tool.
-11. Summarize only facts supported by the tool result. Label any practical recommendation not stated by Microsoft as `Suggested admin consideration`.
-12. Render one canonical digest, then adapt it into the enabled Teams Adaptive Card and email formats below without changing facts.
-13. When Teams delivery is enabled, call `Post weekly admin digest card`. Post as `Flow bot`, post in `Channel`, and use the Team and channel stored on the current subscription row. Pass valid Adaptive Card JSON as the card body, not Markdown and not an `AdaptiveCardPrompt`.
-14. When email delivery is enabled, call `Send an email (V2)` with the recipients stored on the current subscription row, the generated subject, and the email version.
-15. Skip disabled delivery methods. Require at least one enabled method before processing a subscription.
-16. Confirm each attempted delivery separately and update that subscription's last-delivery fields. Never report successful delivery unless its action succeeds.
-17. Do not call `Daily-MC-Trigger` while executing this skill. The workflow initiates digest generation and must not be invoked recursively as a delivery step.
+11. Use `Microsoft Learn Docs MCP Server` only when a qualifying post lacks actionable implementation detail or explicitly describes a known issue, configuration requirement, migration, deprecation, or administrator remediation. Search with the exact product, feature, Message Center ID, error code, or terminology returned by the tenant source.
+12. Add Learn content only when the result clearly matches the post. Preserve the Learn page title and canonical link, and label the content `Microsoft Learn guidance`. Do not use Learn content as evidence that the change affects the tenant, and do not replace Message Center dates, status, impact, or actions with documentation-derived values.
+13. Summarize only facts supported by the applicable tool result. Label any practical recommendation not stated by Microsoft as `Suggested admin consideration`. Keep Microsoft-stated Message Center actions, Microsoft Learn guidance, and agent suggestions distinct.
+14. Render one canonical digest, then adapt it into the enabled Teams Adaptive Card and email formats below without changing facts.
+15. When Teams delivery is enabled, call `Post weekly admin digest card`. Post as `Flow bot`, post in `Channel`, and use the Team and channel stored on the current subscription row. Pass valid Adaptive Card JSON as the card body, not Markdown and not an `AdaptiveCardPrompt`.
+16. When email delivery is enabled, call `Send an email (V2)` with the recipients stored on the current subscription row, the generated subject, and the email version.
+17. Skip disabled delivery methods. Require at least one enabled method before processing a subscription.
+18. Confirm each attempted delivery separately and update that subscription's last-delivery fields. Never report successful delivery unless its action succeeds.
+19. Do not call `Daily-MC-Trigger` while executing this skill. The workflow initiates digest generation and must not be invoked recursively as a delivery step.
 
 ## Teams Adaptive Card format
 
@@ -56,6 +59,7 @@ Use Adaptive Card schema version `1.4` with this structure:
   - A `FactSet` for Product, Category, Major, Status, and Timing.
   - A wrapped `TextBlock` beginning `Admin impact:` followed by the concise impact.
   - A wrapped `TextBlock` beginning `Action:` followed by the Microsoft-stated action or `No explicit admin action provided`.
+  - A wrapped `TextBlock` beginning `Microsoft Learn guidance:` followed by a concise documented prerequisite, known issue, or action, with the canonical Learn link, when a clearly matching Learn result was found.
   - A wrapped `TextBlock` containing `[Open Message Center source]({source link})` when a source link is available.
 
 Omit empty category and major-change groups. Do not create empty headings. Keep all `TextBlock` elements wrapped. Do not use tables, input controls, submit actions, images, or decorative content.
