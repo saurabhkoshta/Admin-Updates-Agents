@@ -1,0 +1,17 @@
+mcs.metadata:
+  componentName: Update my admin digest subscription
+  description: Updates or disables only the authenticated user's existing Admin Digest Subscription row in the current environment after confirming requested changes.
+kind: ConnectorTool
+authMode: Invoker
+connectionReference: sample_adminupdatesagent.cr.shared_commondataserviceforapps
+connectorId: /providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps
+operationId: UpdateOnlyRecordWithOrganization
+toolInputs:
+  - name: organization
+    description: Use the current Power Platform environment that contains this imported agent and its solution. Never use or request an environment GUID.
+
+  - name: entityName
+    description: Always use the Admin Digest Subscriptions table with logical name sample_admindigestsubscription. Never update another table.
+
+  - name: recordId
+    description: Use only the row ID returned by Get admin digest subscriptions for the authenticated user. Never accept a user-supplied row ID and never update another owner's row.

@@ -1,0 +1,6 @@
+mcs.metadata:
+  componentName: manage-admin-digest-subscription
+  description: Creates, reviews, updates, tests, or disables the authenticated administrator's Microsoft admin digest subscription.
+  schemaName: sample_adminupdatesagent.skill.manage-admin-digest-subscription
+kind: InlineAgentSkill
+authoringSource: Blank

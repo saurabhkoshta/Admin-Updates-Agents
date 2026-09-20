@@ -1,0 +1,14 @@
+mcs.metadata:
+  componentName: Create my admin digest subscription
+  description: Creates one Admin Digest Subscription row owned by the authenticated user in the current environment. Use only after confirming the requested preferences.
+kind: ConnectorTool
+authMode: Invoker
+connectionReference: sample_adminupdatesagent.cr.shared_commondataserviceforapps
+connectorId: /providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps
+operationId: CreateRecordWithOrganization
+toolInputs:
+  - name: organization
+    description: Use the current Power Platform environment that contains this imported agent and its solution. Never use or request an environment GUID.
+
+  - name: entityName
+    description: Always use the Admin Digest Subscriptions table with logical name sample_admindigestsubscription. Create only a row owned by the authenticated user, and include only confirmed subscription preferences.

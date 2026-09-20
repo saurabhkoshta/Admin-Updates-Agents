@@ -1,0 +1,23 @@
+mcs.metadata:
+  componentName: Get admin digest subscriptions
+  description: Retrieves the authenticated administrator subscription or active due subscriptions from the Admin Digest Subscriptions table in the current environment.
+kind: ConnectorTool
+authMode: Invoker
+connectionReference: sample_adminupdatesagent.cr.shared_commondataserviceforapps
+connectorId: /providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps
+operationId: ListRecordsWithOrganization
+toolInputs:
+  - name: organization
+    description: Use the current Power Platform environment that contains this imported agent and its solution. Never use or request an environment GUID.
+
+  - name: entityName
+    description: Always use the Admin Digest Subscriptions table with logical name sample_admindigestsubscription. Never query another table.
+
+  - name: $select
+    description: Return only subscription fields required for ownership, selected products, delivery preferences, Teams destination, email recipients, schedule, time zone, active state, and delivery status.
+
+  - name: $filter
+    description: For an interactive request, return only rows owned by the authenticated user. For scheduled processing, return only active subscriptions due for that run. Never retrieve another user profile interactively.
+
+  - name: $top
+    description: Return no more than 100 subscription rows.
