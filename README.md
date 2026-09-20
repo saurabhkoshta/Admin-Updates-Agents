@@ -1,6 +1,6 @@
 # Microsoft Admin Updates Agent
 
-![Microsoft Admin Updates agent icon](icon.png)
+<img src="icon.png" alt="Microsoft Admin Updates agent icon" width="220">
 
 Microsoft Admin Updates is a Copilot Studio reference agent for Microsoft 365 and Azure administrators. It correlates tenant communications, public release information, and Microsoft Learn documentation, then turns the evidence into concise operational guidance.
 
