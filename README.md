@@ -1,10 +1,10 @@
-# Microsoft Admin Updates Agent
+# Admin Updates Agent
 
-<img src="icon.png" alt="Microsoft Admin Updates agent icon" width="220">
+<img src="icon.png" alt="Admin Updates Agent icon" width="220">
 
-Microsoft Admin Updates is a Copilot Studio reference agent for Microsoft 365 and Azure administrators. It correlates tenant communications, public release information, and Microsoft Learn documentation, then turns the evidence into concise operational guidance.
+Admin Updates Agent is a Copilot Studio reference agent for Microsoft 365 and Azure administrators. It correlates tenant communications, public release information, and Microsoft Learn documentation, then turns the evidence into concise operational guidance.
 
-This is a community reference implementation. It is not an official Microsoft product and is not covered by Microsoft support.
+This is an independent community reference implementation. It is not developed, endorsed, or supported by Microsoft.
 
 ## Capabilities
 
@@ -28,7 +28,7 @@ See [PROFILES.md](PROFILES.md) for the exact capability and dependency split.
 
 ```mermaid
 flowchart LR
-    User[Administrator] --> Agent[Microsoft Admin Updates]
+    User[Administrator] --> Agent[Admin Updates Agent]
     Agent --> Enterprise[MCP Server for Enterprise]
     Agent --> Release[Release Communication Server]
     Agent --> Learn[Microsoft Learn Docs MCP Server]
