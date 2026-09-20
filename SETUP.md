@@ -1,17 +1,12 @@
 # Setup Guide
 
-This guide describes the environment work required to adapt the reference agent. Copilot Studio and connector behavior can vary by environment, licensing, and feature availability, so review every generated identifier before pushing changes.
+This guide is for administrators installing Admin Updates Agent from an exported Power Platform solution. Copilot Studio and connector behavior can vary by environment, licensing, and feature availability.
 
-## 1. Choose a profile
+## 1. Download the solution
 
-Read [PROFILES.md](PROFILES.md), then generate a deployment workspace:
+Download the solution ZIP attached to the GitHub release you intend to install. Do not download the repository source ZIP from GitHub's **Code** menu. A source archive is not an importable Power Platform solution.
 
-```powershell
-.\scripts\Build-AgentProfile.ps1 -Profile core
-.\scripts\Build-AgentProfile.ps1 -Profile personalized
-```
-
-Use `core` to build the research and shared-digest experience with one administrator-controlled configuration and no Dataverse. Use `personalized` for per-user products, schedules, time zones, and destinations stored in Dataverse.
+This repository does not currently publish a solution release asset. The repository owner must export and attach the complete solution before this installation path is available to end users.
 
 ## 2. Prepare the environment
 
@@ -19,43 +14,23 @@ You need:
 
 - A Power Platform environment.
 - Permission to create or update Copilot Studio agents, connections, connection references, and cloud flows.
-- The Copilot Studio extension for Visual Studio Code.
 - Access to each MCP server used by the agent.
-
-The personalized profile additionally requires Dataverse permissions to create or bind the subscription table and configure its security roles.
+- Dataverse permissions to import or bind the subscription table and configure its security roles.
 
 Create a development environment first. Do not test imported connection references or scheduled delivery against production users.
 
-## 3. Bind a local agent workspace
+## 3. Import the solution
 
-Use the Copilot Studio extension to create or clone the target agent into a local workspace. This creates the local `.mcs/` connection metadata used for validation, pull, and push operations.
+1. Open [Power Apps](https://make.powerapps.com/) and select the target environment.
+2. Open **Solutions**, select **Import solution**, and upload the release ZIP.
+3. Review the solution details and proceed through the import wizard.
+4. Select or create each required connection when prompted.
+5. Supply any environment-variable values included with the release.
+6. Wait for the import to complete, then review all warnings before enabling flows or publishing the agent.
 
-Keep `.mcs/` local. It can contain environment details and connector synchronization data and is excluded by this repository's `.gitignore`.
+Import into a development environment first. Do not enable scheduled delivery against production users until testing is complete.
 
-Before each push:
-
-1. Pull the latest target agent state.
-2. Review the local changes against the target environment.
-3. Validate all `.mcs.yml` files with the Copilot Studio extension.
-4. Push to a development agent.
-5. Test before publishing.
-
-Publishing makes the draft available to everyone with access to that agent. Treat publishing as a separate, deliberate operation.
-
-## 4. Review generated identities
-
-The checked-in files contain source-environment values such as:
-
-- The `sample` publisher prefix.
-- The agent schema name in `settings.mcs.yml`.
-- Connection reference logical names in `capabilities/tools/`.
-- Connector IDs and mappings in `connectors/` and `infrastructure/connections/`.
-
-Allow the target environment or import process to generate and bind its own values where supported. Otherwise, update references consistently across the workspace. Do not edit a single generated identifier in isolation.
-
-The connector definitions also contain tenant and federated identity identifiers from the source environment. These values are identifiers rather than credentials, but they are not portable. Regenerate the OAuth and federated identity configuration for the target tenant instead of relying on the checked-in source values.
-
-## 5. Configure connections
+## 4. Configure connections
 
 Create and test these connections in the target environment:
 
@@ -70,25 +45,9 @@ Create and test these connections in the target environment:
 
 The agent uses invoker authentication for its tools. Grant only the permissions required by each connector and test with a non-administrator account where practical.
 
-The core profile does not require Dataverse. Teams and Outlook are required only for the delivery methods enabled in its fixed configuration.
+Teams and Outlook are required only for delivery methods you enable.
 
-## 6. Configure core delivery
-
-Skip this section for the personalized profile.
-
-Create a scheduled cloud flow that invokes `core-admin-digest` with administrator-controlled values for:
-
-- Product scope, with an empty selection meaning all returned products.
-- Reporting-window start and end timestamps and time zone.
-- Teams enabled, Team, and channel.
-- Email enabled and recipients.
-- Optional digest label.
-
-Store destinations in secured flow configuration or environment variables. Do not place them in agent instructions or commit them to Git. Create the core scheduler as a separate flow. Do not repoint the source `Daily-MC-Trigger`, because that flow invokes the personalized `weekly-admin-digest` behavior.
-
-## 7. Create the personalized subscription data model
-
-Skip this section for the core profile.
+## 5. Verify the subscription data model
 
 Digest features expect a user-owned Dataverse table named `Admin Digest Subscriptions`. The current behaviors refer to the source logical name `sample_admindigestsubscription`.
 
@@ -110,9 +69,9 @@ The table must represent at least these values:
 
 Use a user-or-team-owned table. Configure least-privilege Dataverse roles so users can access only the rows appropriate to them. If the target table uses different logical names or choice labels, update the Dataverse actions and behavior instructions together.
 
-## 8. Add personalized scheduled orchestration
+## 6. Verify scheduled orchestration
 
-The local agent workspace does not include solution flow exports. The source solution's `Daily-MC-Trigger` already invokes `weekly-admin-digest` on Monday at 8:00 AM Central Time. Preserve or recreate that flow when deploying the personalized profile.
+Confirm that the imported scheduled flow invokes `weekly-admin-digest`. Review its recurrence before enabling it.
 
 The flow should:
 
@@ -124,7 +83,7 @@ The flow should:
 
 Keep connection identifiers and user destinations in Dataverse or environment-bound connections, not in the behavior files.
 
-## 9. Configure and test the agent
+## 7. Configure and test the agent
 
 The checked-in model selection may not be available in every environment. Select a supported model in the target environment and revalidate the agent.
 
@@ -141,3 +100,5 @@ Test at least these scenarios before publishing:
 - Attempts to access another user's Dataverse row.
 
 Verify that responses preserve source IDs and links, distinguish public from tenant evidence, and never expose raw connector payloads or internal identifiers.
+
+After testing, publish the agent and enable the scheduled flow. Publishing makes the draft available to everyone with access to that agent, so treat it as a separate, deliberate operation.
