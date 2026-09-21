@@ -62,7 +62,6 @@ The agent preserves source-specific IDs, dates, status, scope, and links. It doe
 | `settings/` | Additional Copilot Studio settings |
 | `workflows/` | Reserved for workflow definitions; currently empty |
 | `solution/` | Sanitized, importable Power Platform solution and checksum |
-| `scripts/` | Repository publication and validation automation |
 
 ## Prerequisites
 
@@ -72,10 +71,6 @@ The agent preserves source-specific IDs, dates, status, scope, and links. It doe
 - Dataverse and a user-owned `Admin Digest Subscriptions` table with appropriate least-privilege security roles.
 
 See [SETUP.md](SETUP.md) for environment preparation and connection rebinding.
-
-## Repository histories
-
-Maintain tenant-bound source in a private repository and publish only a generated, sanitized history. See [HISTORY.md](HISTORY.md) for the migration and ongoing release process.
 
 ## Important portability notes
 
