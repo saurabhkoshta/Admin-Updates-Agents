@@ -1,6 +1,6 @@
 mcs.metadata:
   componentName: Send an email (V2)
-  description: This operation sends an email message.
+  description: Sends the weekly admin digest, or a subscription test digest, by email. Use only the recipients stored in the Email Recipients field of the subscription being processed. Never send email to any other address or for any other purpose.
 kind: ConnectorTool
 authMode: Invoker
 connectionReference: sample_adminupdatesagent.cr.shared_office365

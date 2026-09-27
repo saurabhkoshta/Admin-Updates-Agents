@@ -1,6 +1,6 @@
 mcs.metadata:
   componentName: MCP-Server-for-Enterprise
-  description: A Model Context Protocol (MCP) server that enables AI assistants to securely interact with Microsoft Graph API for enterprise identity and access management operations.
+  description: Read-only, tenant-specific Microsoft 365 Message Center posts (including category, tags, major-change flag, and affected services) and Service Health Dashboard incidents and advisories for the signed-in administrator's tenant. Use it to establish tenant impact, not for public roadmap information or product documentation.
 kind: McpTool
 authMode: Invoker
 connectionReference: sample_adminupdatesagent.cr.shared_sample-5fmcp-.publicenterpriseconnection

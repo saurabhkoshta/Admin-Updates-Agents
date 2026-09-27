@@ -1,6 +1,6 @@
 mcs.metadata:
   componentName: Update my admin digest subscription
-  description: Updates or disables only the authenticated user's existing Admin Digest Subscription row in the current environment after confirming requested changes.
+  description: Updates or disables the authenticated user's existing Admin Digest Subscription row after confirming requested changes, or records last-delivery results for the subscription being processed during a scheduled weekly-admin-digest run.
 kind: ConnectorTool
 authMode: Invoker
 connectionReference: sample_adminupdatesagent.cr.shared_commondataserviceforapps
@@ -14,4 +14,4 @@ toolInputs:
     description: Always use the Admin Digest Subscriptions table with logical name sample_admindigestsubscription. Never update another table.
 
   - name: recordId
-    description: Use only the row ID returned by Get admin digest subscriptions for the authenticated user. Never accept a user-supplied row ID and never update another owner's row.
+    description: Use only the row ID returned by Get admin digest subscriptions in the current run. Interactively, that is the authenticated user's own row. During a scheduled weekly-admin-digest run, it is the due subscription being processed, and only its Last Delivery At and Last Delivery Status fields may change. Never accept a user-supplied row ID.

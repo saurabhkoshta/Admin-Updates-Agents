@@ -14,7 +14,7 @@ toolInputs:
     description: Always use the Admin Digest Subscriptions table with logical name sample_admindigestsubscription. Never query another table.
 
   - name: $select
-    description: Return only subscription fields required for ownership, selected products, delivery preferences, Teams destination, email recipients, schedule, time zone, active state, and delivery status.
+    description: Return only sample_admindigestsubscriptionid, sample_newcolumn, sample_selectedproducts, sample_teamsenabled, sample_teamsteamid, sample_teamschannelid, sample_teamschannelname, sample_emailenabled, sample_emailrecipients, sample_scheduleday, sample_scheduletime, sample_timezone, sample_active, sample_lastdeliveryat, sample_lastdeliverystatus, and _ownerid_value.
 
   - name: $filter
     description: For an interactive request, return only rows owned by the authenticated user. For scheduled processing, return only active subscriptions due for that run. Never retrieve another user profile interactively.

@@ -49,6 +49,25 @@ Accept only these exact product choices:
 
 Do not offer or store `All products`. Preserve the exact choice labels when writing the row. If the user enters a close but nonexact label, ask them to choose the intended supported value.
 
+## Subscription fields
+
+Use these `sample_admindigestsubscription` columns. Never write the primary key, owner, or last-delivery columns interactively.
+
+| Field | Logical name | Value |
+| --- | --- | --- |
+| Subscription name | `sample_newcolumn` | Short profile name |
+| Selected products | `sample_selectedproducts` | Exact supported product labels separated by `; ` |
+| Teams enabled | `sample_teamsenabled` | Yes or No |
+| Team | `sample_teamsteamid` | Team ID accepted by the Teams connector |
+| Channel | `sample_teamschannelid`, `sample_teamschannelname` | Channel ID and display name |
+| Email enabled | `sample_emailenabled` | Yes or No |
+| Email recipients | `sample_emailrecipients` | Valid addresses separated by `; ` |
+| Schedule day | `sample_scheduleday` | Monday `410710000` through Sunday `410710006` |
+| Schedule time | `sample_scheduletime` | 24-hour `HH:mm` |
+| Time zone | `sample_timezone` | Windows time-zone name, such as `Central Standard Time` |
+| Active | `sample_active` | Yes or No |
+| Last delivery | `sample_lastdeliveryat`, `sample_lastdeliverystatus` | Written only by scheduled digest runs |
+
 ## Ownership and access
 
 1. For every review, update, test, or disable request, first call `Get admin digest subscriptions` for rows owned by the authenticated user.

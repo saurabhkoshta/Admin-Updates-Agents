@@ -1,6 +1,6 @@
 mcs.metadata:
-  componentName: Microsoft Learn Docs MCP — Microsoft Learn Docs MCP Server
-  description: MCP Server to search Microsoft Learn content
+  componentName: Microsoft Learn Docs MCP Server
+  description: Searches official Microsoft Learn documentation for product behavior, availability labels, prerequisites, configuration, limitations, known issues, troubleshooting, and remediation. Does not establish tenant impact or rollout timing.
 kind: McpTool
 authMode: Invoker
 connectionReference: sample_adminupdatesagent.cr.shared_microsoftlear.publiclearnconnection

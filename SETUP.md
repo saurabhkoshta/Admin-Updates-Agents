@@ -64,25 +64,25 @@ Digest features use the imported user-owned Dataverse table named `Admin Digest 
 
 The table must represent at least these values:
 
-| Value | Purpose |
-| --- | --- |
-| Subscription name | Human-readable profile name |
-| Selected products | One or more supported Microsoft product choices |
-| Teams enabled | Enables Teams delivery |
-| Email enabled | Enables email delivery |
-| Team and channel | Teams destination values accepted by the connector |
-| Email recipients | One or more validated recipients |
-| Schedule day and time | Weekly delivery schedule |
-| Time zone | Calculates the rolling seven-day reporting window |
-| Active | Enables or disables processing without deleting history |
-| Last-delivery fields | Records delivery result and timing |
-| Owner | Enforces the per-user subscription boundary |
+| Value | Logical name | Purpose |
+| --- | --- | --- |
+| Subscription name | `sample_newcolumn` | Human-readable profile name |
+| Selected products | `sample_selectedproducts` | One or more supported product labels, separated by `; ` |
+| Teams enabled | `sample_teamsenabled` | Enables Teams delivery |
+| Email enabled | `sample_emailenabled` | Enables email delivery |
+| Team and channel | `sample_teamsteamid`, `sample_teamschannelid`, `sample_teamschannelname` | Teams destination values accepted by the connector |
+| Email recipients | `sample_emailrecipients` | One or more validated recipients |
+| Schedule day and time | `sample_scheduleday`, `sample_scheduletime` | Weekly delivery schedule |
+| Time zone | `sample_timezone` | Calculates the rolling seven-day reporting window |
+| Active | `sample_active` | Enables or disables processing without deleting history |
+| Last-delivery fields | `sample_lastdeliveryat`, `sample_lastdeliverystatus` | Records delivery result and timing |
+| Owner | `ownerid` | Enforces the per-user subscription boundary |
 
 Use a user-or-team-owned table. Configure least-privilege Dataverse roles so users can access only the rows appropriate to them. If the target table uses different logical names or choice labels, update the Dataverse actions and behavior instructions together.
 
 ## 6. Verify scheduled orchestration
 
-Confirm that the imported scheduled flow invokes `weekly-admin-digest`. Review its recurrence before enabling it.
+Confirm that the imported scheduled flow invokes `weekly-admin-digest`. Review its recurrence before enabling it. As shipped, it runs weekly on Monday at 08:00 Central Standard Time. Subscriptions with a different stored schedule day or time are not processed separately until you change the recurrence.
 
 The flow should:
 

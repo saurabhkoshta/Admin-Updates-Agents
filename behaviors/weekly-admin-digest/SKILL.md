@@ -10,7 +10,7 @@ Create and automatically deliver a concise weekly digest of tenant-specific Micr
 ## Subscription configuration
 
 - Load active subscription rows from the `Admin Digest Subscriptions` Dataverse table in the current Power Platform environment.
-- Each subscription supplies its selected products, enabled delivery methods, Teams destination, email recipients, schedule, and time zone.
+- Each subscription supplies its selected products (`sample_selectedproducts`, exact product labels separated by `; `), enabled delivery methods, Teams destination, email recipients, schedule, and time zone.
 - Reporting window: the rolling seven days immediately before that subscription's scheduled run time.
 - Tenant source: `MCP-Server-for-Enterprise`.
 - Documentation source: `Microsoft Learn Docs MCP Server`.
@@ -42,7 +42,7 @@ Never embed tenant, environment, connection, owner, Team, channel, recipient, sc
 15. When Teams delivery is enabled, call `Post weekly admin digest card`. Post as `Flow bot`, post in `Channel`, and use the Team and channel stored on the current subscription row. Pass valid Adaptive Card JSON as the card body, not Markdown and not an `AdaptiveCardPrompt`.
 16. When email delivery is enabled, call `Send an email (V2)` with the recipients stored on the current subscription row, the generated subject, and the email version.
 17. Skip disabled delivery methods. Require at least one enabled method before processing a subscription.
-18. Confirm each attempted delivery separately and update that subscription's last-delivery fields. Never report successful delivery unless its action succeeds.
+18. Confirm each attempted delivery separately, then call `Update my admin digest subscription` for the processed row to set only `sample_lastdeliveryat` and `sample_lastdeliverystatus`. Never report successful delivery unless its action succeeds.
 19. Do not call `Daily-MC-Trigger` while executing this skill. The workflow initiates digest generation and must not be invoked recursively as a delivery step.
 
 ## Teams Adaptive Card format
