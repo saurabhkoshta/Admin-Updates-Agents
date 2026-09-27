@@ -25,8 +25,19 @@ Create a development environment first. Do not test imported connection referenc
 2. Open **Solutions**, select **Import solution**, and upload the release ZIP.
 3. Review the solution details and proceed through the import wizard.
 4. Select or create each required connection when prompted.
-5. Supply any environment-variable values included with the release.
+5. When the wizard shows the **Allowed Recipient Domains** environment variable, enter your tenant's email domains. See [Set your tenant's allowed email domains](#set-your-tenants-allowed-email-domains) below.
 6. Wait for the import to complete, then review all warnings before enabling flows or publishing the agent.
+
+### Set your tenant's allowed email domains
+
+> [!IMPORTANT]
+> The digest flow emails only recipients whose address domain is listed in the `sample_AllowedRecipientDomains` (**Allowed Recipient Domains**) environment variable. The package ships without a value. Set it to **your own tenant's domains** before you turn on the flow.
+
+- Use a semicolon-separated list of your tenant's verified domains, for example `contoso.com;contoso.onmicrosoft.com`. You can find them in the Microsoft 365 admin center under **Settings** > **Domains**, or in the Microsoft Entra admin center under **Custom domain names**.
+- Matching is exact and case-insensitive. Subdomains aren't included automatically, so list each subdomain you use (for example `eu.contoso.com`).
+- Don't add external or consumer domains. The allowlist is what prevents the digest from being emailed outside your organization.
+- Power Automate won't turn on the flow until the variable has a value. If a subscription has no allowed recipients, the flow skips email for it and records the reason in **Last Delivery Status**.
+- To change the value later, open **Solutions** > **Admin Updates Agent** > **Environment variables** > **Allowed Recipient Domains** and edit **Current value**.
 
 Import into a development environment first. Do not enable scheduled delivery against production users until testing is complete.
 
@@ -50,15 +61,34 @@ Create and test these connections in the target environment:
 | MCP Server for Enterprise | Tenant Message Center and Service Health data |
 | Release Communication Server | Microsoft 365 Roadmap and Azure Updates |
 | Microsoft Learn Docs MCP Server | Official Microsoft documentation |
-| Microsoft Dataverse | Digest subscription storage |
-| Microsoft Teams | Adaptive Card delivery to a channel |
-| Microsoft 365 Outlook | Email delivery |
+| Microsoft Dataverse | Digest subscription storage (agent and flow) |
+| Microsoft Copilot Studio | Lets the digest flow invoke the agent to retrieve Message Center posts |
+| Microsoft Teams | Adaptive Card delivery to a channel (flow only) |
+| Microsoft 365 Outlook | Email delivery (flow only) |
 
-The agent uses invoker authentication for its tools. Grant only the permissions required by each connector and test with a non-administrator account where practical.
+The agent uses invoker authentication for its tools. It has no email or Teams tool, so it can't deliver anything itself. Grant only the permissions required by each connector and test with a non-administrator account where practical.
 
-Teams and Outlook are required only for delivery methods you enable.
+The `Daily-MC-Trigger` flow runs under its owner's connections. Use a dedicated digest account that:
 
-## 5. Verify the subscription data model
+- owns the flow's Dataverse, Copilot Studio, Teams, and Outlook connections;
+- can read Message Center posts through MCP Server for Enterprise (for example, a Message Center Reader role);
+- belongs to every team that subscribers choose for Teams delivery;
+- has the **Admin Digest Processor** security role.
+
+Digest email is sent from this account's mailbox.
+
+## 5. Assign security roles
+
+The solution includes two least-privilege roles for the `Admin Digest Subscriptions` table. Assign them together with the environment's standard **Basic User** role.
+
+| Role | Assign to | Access |
+| --- | --- | --- |
+| Admin Digest Subscriber | Every administrator who uses the agent | Create, read, write, append, and append to **their own** rows (user level). No delete. |
+| Admin Digest Processor | The digest flow's owner account only | Read and write **all** rows (organization level), to select active subscriptions and record delivery status. |
+
+Don't give subscribers organization-level access to the table. The agent's lookup tool has a fixed owner filter, and the Subscriber role is the enforcement boundary that keeps each administrator to their own rows.
+
+## 6. Verify the subscription data model
 
 Digest features use the imported user-owned Dataverse table named `Admin Digest Subscriptions`. Its sanitized logical name is `sample_admindigestsubscription`.
 
@@ -72,29 +102,29 @@ The table must represent at least these values:
 | Email enabled | `sample_emailenabled` | Enables email delivery |
 | Team and channel | `sample_teamsteamid`, `sample_teamschannelid`, `sample_teamschannelname` | Teams destination values accepted by the connector |
 | Email recipients | `sample_emailrecipients` | One or more validated recipients |
-| Schedule day and time | `sample_scheduleday`, `sample_scheduletime` | Weekly delivery schedule |
+| Schedule day and time | `sample_scheduleday`, `sample_scheduletime` | Recorded delivery preference. The flow's recurrence controls when digests are sent. |
 | Time zone | `sample_timezone` | Calculates the rolling seven-day reporting window |
 | Active | `sample_active` | Enables or disables processing without deleting history |
 | Last-delivery fields | `sample_lastdeliveryat`, `sample_lastdeliverystatus` | Records delivery result and timing |
-| Owner | `ownerid` | Enforces the per-user subscription boundary |
+| Owner | `ownerid` | Enforces the per-user subscription boundary. The agent's lookup always filters on `owninguser/azureactivedirectoryobjectid` equal to the signed-in user's Entra object ID. |
 
-Use a user-or-team-owned table. Configure least-privilege Dataverse roles so users can access only the rows appropriate to them. If the target table uses different logical names or choice labels, update the Dataverse actions and behavior instructions together.
+Keep the table user-owned. If the target table uses different logical names or choice labels, update the Dataverse tools, the flow, and the behavior instructions together.
 
-## 6. Verify scheduled orchestration
+## 7. Verify scheduled orchestration
 
-Confirm that the imported scheduled flow invokes `weekly-admin-digest`. Review its recurrence before enabling it. As shipped, it runs weekly on Monday at 08:00 Central Standard Time. Subscriptions with a different stored schedule day or time are not processed separately until you change the recurrence.
+`Daily-MC-Trigger` runs the whole digest pipeline. Review its recurrence before turning it on. As shipped, it runs weekly on Monday at 08:00 Central Standard Time. Every active subscription is processed on each run; the stored schedule day and time are recorded preferences only.
 
-The flow should:
+On each run, the flow:
 
-1. Run on a schedule appropriate for the supported time zones.
-2. Select only active subscriptions due for that run.
-3. Invoke digest generation once for each due subscription.
-4. Isolate failures so one subscription does not block another.
-5. Avoid calling itself from the digest behavior.
+1. Calculates the rolling seven-day window ending at the scheduled run time.
+2. Invokes the agent **once**, with a fixed Microsoft Graph request and a structured output schema. The agent only retrieves posts and writes short impact and action summaries.
+3. Keeps only posts whose category is Plan for change or Prevent or fix issue **and** that are tagged Admin impact. It removes exact duplicates and sorts by group, action date, then last-modified date. This logic is deterministic in the flow, not decided by the model.
+4. For each active subscription, keeps posts whose services match the selected products (case-insensitive), then renders Adaptive Cards from a fixed template. Cards hold at most 10 posts, with text fields truncated, and a compact fallback is posted if a card would exceed 27,000 characters, so every card stays under the Teams 28 KB limit.
+5. Emails only recipients in the allowed domains, posts cards only to the stored team and channel, and writes the outcome to **Last Delivery Status**.
+6. Isolates failures per subscription. If retrieval fails, it sends nothing and records the failure on every active subscription.
 
 Keep connection identifiers and user destinations in Dataverse or environment-bound connections, not in the behavior files.
-
-## 7. Configure and test the agent
+## 8. Configure and test the agent
 
 The checked-in model selection may not be available in every environment. Select a supported model in the target environment and revalidate the agent.
 
@@ -104,12 +134,13 @@ Test at least these scenarios before publishing:
 - A roadmap lookup with a future date.
 - A past-dated roadmap item that requires current-state verification.
 - A cross-source investigation with conflicting dates or status.
-- Subscription creation, review, update, test, and disable operations.
-- Teams-only, email-only, and dual-channel digest delivery.
+- Subscription creation, review, update, preview, and disable operations.
+- Teams-only, email-only, and dual-channel digest delivery (run the flow manually in the development environment).
+- A subscription with recipients outside the allowed domains. They must be skipped and counted in Last Delivery Status.
 - A no-result digest.
 - Connector denial, missing permissions, and partial delivery failure.
-- Attempts to access another user's Dataverse row.
+- Attempts to access another user's Dataverse row. The lookup must return only the signed-in user's rows.
 
 Verify that responses preserve source IDs and links, distinguish public from tenant evidence, and never expose raw connector payloads or internal identifiers.
 
-After testing, publish the agent and enable the scheduled flow. Publishing makes the draft available to everyone with access to that agent, so treat it as a separate, deliberate operation.
+After testing, publish the agent, confirm **Allowed Recipient Domains** contains only your tenant's domains, and then turn on the scheduled flow. Publishing makes the draft available to everyone with access to that agent, so treat it as a separate, deliberate operation.

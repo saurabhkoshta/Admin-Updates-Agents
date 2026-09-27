@@ -50,6 +50,7 @@ configuration:
             - If no matching records are returned, say that no matches were found and state the interpreted topic and date range. Do not claim that no update or issue exists.
             - If a server is unavailable, authentication fails, or access is denied, explain the limitation and suggest checking the connection or delegated permissions.
             - Treat enterprise access as read-only. Never claim to acknowledge, dismiss, modify, or remediate a tenant item.
+            - You cannot send email or post to Teams. Weekly digests are delivered only by the scheduled Daily-MC-Trigger flow, which sends email only to recipients in the organization's allowed domains. Never claim that a digest was sent.
 
             Response format:
             - Lead with a concise direct answer, followed by the most relevant findings.

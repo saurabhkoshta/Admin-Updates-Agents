@@ -1,90 +1,51 @@
 ---
 name: weekly-admin-digest
-description: Creates and delivers the weekly Microsoft 365 administrator digest from Plan for change or Prevent or fix issue posts tagged Admin impact.
+description: Retrieves Message Center posts for the scheduled weekly admin digest flow, or previews the digest in chat. Never delivers email or Teams messages.
 ---
 <!-- bic:source=blank -->
 # Weekly Admin Digest
 
-Create and automatically deliver a concise weekly digest of tenant-specific Microsoft 365 Message Center posts for administrators.
+The weekly digest has two parts:
 
-## Subscription configuration
+- The `Daily-MC-Trigger` flow owns scheduling, subscription selection, filtering, ordering, Adaptive Card and email rendering, recipient-domain allowlisting, delivery, and last-delivery status. Its logic is deterministic.
+- This skill only retrieves and summarizes Message Center posts for that flow, or previews a digest in chat.
 
-- Load active subscription rows from the `Admin Digest Subscriptions` Dataverse table in the current Power Platform environment.
-- Each subscription supplies its selected products (`sample_selectedproducts`, exact product labels separated by `; `), enabled delivery methods, Teams destination, email recipients, schedule, and time zone.
-- Reporting window: the rolling seven days immediately before that subscription's scheduled run time.
-- Tenant source: `MCP-Server-for-Enterprise`.
-- Documentation source: `Microsoft Learn Docs MCP Server`.
-- Required filters: category equals `planForChange` or `preventOrFixIssue` AND tag equals `Admin impact`, with text comparisons case-insensitive.
-- Teams delivery tool: `Post weekly admin digest card`.
-- Email delivery tool: `Send an email (V2)`.
-- Delivery mode: automatic, without approval.
+You have no email or Teams tool. Never claim that a digest was sent or posted.
 
-Never embed tenant, environment, connection, owner, Team, channel, recipient, schedule, or time-zone identifiers in this behavior. Resolve them from the imported solution and the current subscription row.
+## Scheduled data mode
 
-## Procedure
+Use this mode when the message starts with `Scheduled weekly-admin-digest data run`. The flow supplies the reporting window, an exact Microsoft Graph request, and a structured output schema.
 
-1. Load the active subscription rows due for the current scheduled run. Process each row independently. A failure for one subscription must not change another subscription's content or delivery status.
-2. Determine the run timestamp in the subscription's configured time zone and calculate the exact rolling seven-day start and end timestamps. Include both timestamps and the time-zone name in the digest.
-3. Query `MCP-Server-for-Enterprise` for Message Center posts in that window. Request `category`, `tags`, `isMajorChange`, and product or service explicitly for every returned post.
-4. Keep only posts whose returned product or service matches one of the subscription's selected product choices. Compare against the stored choice labels case-insensitively. Do not infer a product match from title text when the product or service field is missing.
-5. Keep a post only when both conditions are explicitly satisfied:
-   - Category is `planForChange` or `preventOrFixIssue`, compared case-insensitively.
-   - At least one message tag is `Admin impact`, compared case-insensitively.
-6. Do not treat a missing category or tag as a match. Do not substitute similar values such as severity, relevance, recommended, important, user impact, or admin action required.
-7. Deduplicate results by Message Center post ID. When duplicate records differ, retain the newest tool-returned version and preserve its latest status and dates.
-8. Group included posts by category in this order: `planForChange`, then `preventOrFixIssue`. Within each category, group posts by `isMajorChange`, showing `Major: Yes` before `Major: No`. Treat only boolean `true` as `Major: Yes`; false or missing values are `Major: No`.
-9. Within each major-change group, sort posts by the nearest administrator action or rollout date when available, then by publication or last-updated date, newest first.
-10. For each post, preserve the Message Center ID, title, affected product or service, category, major-change status, status, published or updated date, rollout or action date, administrator impact, recommended action, and source link when returned by the tool.
-11. Use `Microsoft Learn Docs MCP Server` only when a qualifying post lacks actionable implementation detail or explicitly describes a known issue, configuration requirement, migration, deprecation, or administrator remediation. Search with the exact product, feature, Message Center ID, error code, or terminology returned by the tenant source.
-12. Add Learn content only when the result clearly matches the post. Preserve the Learn page title and canonical link, and label the content `Microsoft Learn guidance`. Do not use Learn content as evidence that the change affects the tenant, and do not replace Message Center dates, status, impact, or actions with documentation-derived values.
-13. Summarize only facts supported by the applicable tool result. Label any practical recommendation not stated by Microsoft as `Suggested admin consideration`. Keep Microsoft-stated Message Center actions, Microsoft Learn guidance, and agent suggestions distinct.
-14. Render one canonical digest, then adapt it into the enabled Teams Adaptive Card and email formats below without changing facts.
-15. When Teams delivery is enabled, call `Post weekly admin digest card`. Post as `Flow bot`, post in `Channel`, and use the Team and channel stored on the current subscription row. Pass valid Adaptive Card JSON as the card body, not Markdown and not an `AdaptiveCardPrompt`.
-16. When email delivery is enabled, call `Send an email (V2)` with the recipients stored on the current subscription row, the generated subject, and the email version.
-17. Skip disabled delivery methods. Require at least one enabled method before processing a subscription.
-18. Confirm each attempted delivery separately, then call `Update my admin digest subscription` for the processed row to set only `sample_lastdeliveryat` and `sample_lastdeliverystatus`. Never report successful delivery unless its action succeeds.
-19. Do not call `Daily-MC-Trigger` while executing this skill. The workflow initiates digest generation and must not be invoked recursively as a delivery step.
+1. Use `MCP-Server-for-Enterprise` to run the supplied Microsoft Graph GET request exactly as written. Do not change its filter, select, or paging parameters.
+2. Follow `@odata.nextLink` until every page is retrieved.
+3. Return every post the request returns. Do not filter, merge, reorder, deduplicate, or omit posts. The flow applies the category, tag, and product filters.
+4. Copy `id`, `title`, `services`, `category`, `tags`, `isMajorChange`, `lastModifiedDateTime`, and `actionRequiredByDateTime` exactly as returned. Use an empty string when a timestamp is missing. Never infer or normalize these values.
+5. For each post, write:
+   - `adminImpact`: at most 300 characters stating what changes and who is affected, using only the post body.
+   - `action`: at most 300 characters with the Microsoft-stated administrator action from the post body, or an empty string when the post states none. Never invent an action.
+6. Add `learnTitle` and `learnUrl` only when the post has category `planForChange` or `preventOrFixIssue`, lacks actionable implementation detail, and a `Microsoft Learn Docs MCP Server` result clearly matches the exact product, feature, Message Center ID, or error code. Use only canonical `https://learn.microsoft.com/` links. Otherwise leave both empty. Learn content never changes Message Center dates, status, impact, or actions.
+7. Set `status` to `ok` only when every page was retrieved. If the Enterprise request fails, is denied, or is incomplete, set `status` to `error`, return an empty `posts` array, and put a short, safe summary in `error`.
+8. Do not send email, post to Teams, create or update Dataverse rows, or call `Daily-MC-Trigger`.
 
-## Teams Adaptive Card format
+## Interactive preview mode
 
-Use Adaptive Card schema version `1.4` with this structure:
+Use this mode when a signed-in administrator asks to preview or test their digest, usually from `manage-admin-digest-subscription`.
 
-- Root fields: `$schema` set to `http://adaptivecards.io/schemas/adaptive-card.json`, `type` set to `AdaptiveCard`, `version` set to `1.4`, and `msteams.width` set to `Full`.
-- Header: a `Container` with style `emphasis` containing a large, bold `TextBlock` titled `Weekly Microsoft 365 Admin Digest`.
-- Summary: wrapped `TextBlock` elements for the exact reporting period, the filter `Plan for change or Prevent or fix issue AND Admin impact`, and the qualifying post count.
-- Category heading: a medium, bold, accent-colored `TextBlock`. Use `Plan for change` first and `Prevent or fix issue` second.
-- Major heading: a bold `TextBlock`. Use `Major: Yes` before `Major: No`.
-- Item: a `Container` with `separator: true` and `spacing: Medium` containing:
-  - A wrapped, bold `TextBlock` with `{Message Center ID}: {title}`.
-  - A `FactSet` for Product, Category, Major, Status, and Timing.
-  - A wrapped `TextBlock` beginning `Admin impact:` followed by the concise impact.
-  - A wrapped `TextBlock` beginning `Action:` followed by the Microsoft-stated action or `No explicit admin action provided`.
-  - A wrapped `TextBlock` beginning `Microsoft Learn guidance:` followed by a concise documented prerequisite, known issue, or action, with the canonical Learn link, when a clearly matching Learn result was found.
-  - A wrapped `TextBlock` containing `[Open Message Center source]({source link})` when a source link is available.
+1. Use the subscription returned by `Get admin digest subscriptions` for the signed-in user. Never preview another user's subscription.
+2. Use the rolling seven days ending now. State the exact start and end timestamps and the subscription's time zone.
+3. Retrieve Message Center posts from `MCP-Server-for-Enterprise` for that window.
+4. Apply the same rules the flow applies:
+   - Category is `planForChange` or `preventOrFixIssue` (case-insensitive).
+   - At least one tag is `Admin impact` (case-insensitive).
+   - At least one returned service matches a selected product (case-insensitive). Never infer a product from the title.
+   - A missing category, tag, or service never matches.
+5. Group by `Plan for change` then `Prevent or fix issue`, and within each by `Major: Yes` then `Major: No`. Within a group, list posts with an action-required date first (soonest first), then the others by last-modified date (newest first).
+6. For each post, show the Message Center ID, title, services, timing, admin impact, Microsoft-stated action or `No explicit admin action provided`, and the Message Center link. Label any recommendation that Microsoft did not state as `Suggested admin consideration`.
+7. If nothing matches, say that no posts matched the selected products and both filters for the stated window. Do not claim that no Message Center posts exist.
+8. End by explaining that this is a preview, and that delivery happens only through the scheduled `Daily-MC-Trigger` flow, which sends email only to recipients in the organization's allowed domains.
 
-Omit empty category and major-change groups. Do not create empty headings. Keep all `TextBlock` elements wrapped. Do not use tables, input controls, submit actions, images, or decorative content.
+## Accuracy and safety
 
-The complete connector payload must remain below 28 KB. If necessary, split the digest into numbered cards. Add `Part {n} of {total}` to each card header. Never split an individual Message Center item, and repeat its category and major-change headings when it starts a new card.
-
-## Email format
-
-- Subject: `Weekly Microsoft 365 Admin Digest | {end date} | {count} admin-impact post(s)`.
-- Begin with the reporting period, exact filters, and qualifying count.
-- Use the same category and major-change grouping order as Teams. Use a compact table within each group when it remains readable. Otherwise use the same item structure as Teams.
-- Include source links when available.
-
-## No-result behavior
-
-If no posts satisfy the selected products and both required filters, still deliver through each enabled method:
-
-- A Teams Adaptive Card using schema version `1.4`, the normal header and reporting-period summary, and one wrapped `TextBlock` stating: `No Message Center posts matched the selected products, category "Plan for change" or "Prevent or fix issue", and tag "Admin impact" for {start timestamp} to {end timestamp} {subscription time zone}.`
-- A short email containing the same statement.
-
-Do not claim there were no Message Center posts in the period.
-
-## Failure behavior
-
-- If the Enterprise MCP query fails, do not send a normal or no-result digest. Return a failure summary with the failed step and error details safe to disclose.
-- If Teams card delivery fails but email succeeds, report partial delivery and identify Teams as failed.
-- If email delivery fails but Teams succeeds, report partial delivery and identify email as failed.
-- Do not expose credentials, tokens, connection details, or raw tool payloads.
+- Treat tool results as the source of truth. Never invent posts, IDs, dates, services, tags, or actions.
+- Never use Microsoft Learn as evidence that a change affects the tenant.
+- Do not expose credentials, tokens, connection details, internal identifiers, or raw tool payloads.

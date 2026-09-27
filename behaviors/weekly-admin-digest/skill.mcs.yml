@@ -1,6 +1,6 @@
 mcs.metadata:
   componentName: weekly-admin-digest
-  description: Creates and delivers the weekly Microsoft 365 administrator digest from Plan for change or Prevent or fix issue posts tagged Admin impact.
+  description: Retrieves Message Center posts for the scheduled weekly admin digest flow, or previews the digest in chat. Never delivers email or Teams messages.
   schemaName: sample_adminupdatesagent.skill.weekly-admin-digest
 kind: InlineAgentSkill
 authoringSource: Blank

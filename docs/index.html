@@ -162,7 +162,7 @@
     <div class="panel hero">
       <div>
         <h1>Admin Updates Agent</h1>
-        <p class="lead">A Copilot Studio reference agent for Microsoft 365 and Azure administrators. It correlates <strong>tenant communications</strong>, <strong>public release information</strong>, and <strong>Microsoft Learn documentation</strong>, then turns the evidence into concise, source-attributed operational guidance. It also delivers a filtered <strong>weekly admin digest</strong> to Teams and email.</p>
+        <p class="lead">A Copilot Studio reference agent for Microsoft 365 and Azure administrators. It correlates <strong>tenant communications</strong>, <strong>public release information</strong>, and <strong>Microsoft Learn documentation</strong>, then turns the evidence into concise, source-attributed operational guidance. A scheduled flow delivers a filtered <strong>weekly admin digest</strong> to Teams and email. Filtering, rendering, and delivery are deterministic, and email goes only to the tenant's allowed domains.</p>
         <div class="badges">
           <span class="badge">Copilot Studio · generative orchestration</span>
           <span class="badge">3 MCP evidence sources</span>
@@ -180,17 +180,17 @@
     <div class="kpis">
       <div class="kpi" style="--c:var(--enterprise)"><div class="v">3</div><div class="l">MCP evidence sources</div></div>
       <div class="kpi" style="--c:var(--accent)"><div class="v">3</div><div class="l">Behavior skills</div></div>
-      <div class="kpi" style="--c:var(--release)"><div class="v">8</div><div class="l">Agent tools</div></div>
-      <div class="kpi" style="--c:var(--learn)"><div class="v">6</div><div class="l">Connection references</div></div>
-      <div class="kpi" style="--c:var(--data)"><div class="v">1</div><div class="l">Dataverse table</div></div>
-      <div class="kpi" style="--c:var(--warn)"><div class="v">1</div><div class="l">Scheduled cloud flow</div></div>
+      <div class="kpi" style="--c:var(--release)"><div class="v">6</div><div class="l">Agent tools (no delivery tools)</div></div>
+      <div class="kpi" style="--c:var(--learn)"><div class="v">7</div><div class="l">Connection references</div></div>
+      <div class="kpi" style="--c:var(--data)"><div class="v">2</div><div class="l">Least-privilege security roles</div></div>
+      <div class="kpi" style="--c:var(--warn)"><div class="v">1</div><div class="l">Deterministic digest flow</div></div>
       <div class="kpi" style="--c:var(--deliver)"><div class="v">27</div><div class="l">Supported digest products</div></div>
     </div>
   </section>
 
   <section id="architecture">
     <h2><span class="num">01</span> Architecture</h2>
-    <p class="lead">Administrators chat with the agent interactively. A weekly recurrence flow invokes the same agent to produce digests. All tools run with invoker (user) authentication, and each MCP server has one distinct evidence role.</p>
+    <p class="lead">Administrators chat with the agent interactively. A weekly flow invokes the agent once to retrieve Message Center posts, then filters, renders, and delivers the digest itself. The agent's tools run with invoker (user) authentication, and each MCP server has one distinct evidence role. The agent has no email or Teams tool.</p>
     <div class="panel diagram">
       <svg viewBox="0 0 1200 560" role="img" aria-labelledby="archTitle archDesc">
         <title id="archTitle">Admin Updates Agent architecture</title>
@@ -205,7 +205,7 @@
         <rect class="lane" x="235" y="20" width="420" height="520" rx="12"/>
         <text class="lane-label" x="249" y="42">COPILOT STUDIO AGENT</text>
         <rect class="lane" x="680" y="20" width="510" height="520" rx="12"/>
-        <text class="lane-label" x="694" y="42">TOOLS · AUTH MODE: INVOKER</text>
+        <text class="lane-label" x="694" y="42">CONNECTED SERVICES</text>
 
         <g>
           <rect class="box" x="30" y="70" width="160" height="72" rx="10"/>
@@ -213,11 +213,12 @@
           <text class="sub" x="110" y="120" text-anchor="middle">Teams · M365 Copilot · web</text>
         </g>
         <g>
-          <rect class="box" x="30" y="400" width="160" height="92" rx="10" style="stroke:var(--warn)"/>
-          <text x="110" y="428" text-anchor="middle" font-weight="700" font-size="14">Daily-MC-Trigger</text>
-          <text class="sub" x="110" y="447" text-anchor="middle">Power Automate recurrence</text>
-          <text class="sub" x="110" y="464" text-anchor="middle">Mon 08:00 Central</text>
-          <text class="sub" x="110" y="481" text-anchor="middle">Invoke agent</text>
+          <rect class="box" x="30" y="380" width="160" height="112" rx="10" style="stroke:var(--warn)"/>
+          <text x="110" y="404" text-anchor="middle" font-weight="700" font-size="14">Daily-MC-Trigger</text>
+          <text class="sub" x="110" y="423" text-anchor="middle">Weekly · Mon 08:00 Central</text>
+          <text class="sub" x="110" y="440" text-anchor="middle">Filter · sort · dedupe</text>
+          <text class="sub" x="110" y="457" text-anchor="middle">Card template (&lt; 28 KB)</text>
+          <text class="sub" x="110" y="474" text-anchor="middle">Tenant domain allowlist</text>
         </g>
 
         <g>
@@ -238,15 +239,15 @@
         <g>
           <rect x="255" y="308" width="380" height="84" rx="10" fill="var(--data-soft)" stroke="var(--data)"/>
           <text x="275" y="334" font-weight="700" font-size="13.5">manage-admin-digest-subscription</text>
-          <text class="sub" x="275" y="354">Create · review · update · test · disable</text>
-          <text class="sub" x="275" y="372">Owner-scoped rows · explicit confirmation before writes</text>
+          <text class="sub" x="275" y="354">Create · review · update · preview · disable</text>
+          <text class="sub" x="275" y="372">Fixed owner filter · confirmation before writes</text>
         </g>
         <g>
-          <rect x="255" y="406" width="380" height="104" rx="10" fill="var(--deliver-soft)" stroke="var(--deliver)"/>
+          <rect x="255" y="406" width="380" height="96" rx="10" fill="var(--deliver-soft)" stroke="var(--deliver)"/>
           <text x="275" y="432" font-weight="700" font-size="13.5">weekly-admin-digest</text>
-          <text class="sub" x="275" y="452">Plan for change | Prevent or fix issue AND Admin impact</text>
-          <text class="sub" x="275" y="470">Group by category → major change → action date</text>
-          <text class="sub" x="275" y="488">Adaptive Card 1.4 (&lt; 28 KB, split into parts) + email</text>
+          <text class="sub" x="275" y="452">Scheduled data mode: fetch posts → structured output</text>
+          <text class="sub" x="275" y="470">Interactive mode: preview the digest in chat</text>
+          <text class="sub" x="275" y="488">No email or Teams tools · never claims delivery</text>
         </g>
 
         <g>
@@ -270,22 +271,22 @@
           <rect x="700" y="300" width="230" height="92" rx="10" fill="var(--data-soft)" stroke="var(--data)"/>
           <text x="815" y="324" text-anchor="middle" font-weight="700" font-size="13">Microsoft Dataverse</text>
           <text class="sub" x="815" y="343" text-anchor="middle">Admin Digest Subscriptions</text>
-          <text class="sub" x="815" y="360" text-anchor="middle">List · Create · Update rows</text>
-          <text class="sub" x="815" y="377" text-anchor="middle">User-owned table</text>
+          <text class="sub" x="815" y="360" text-anchor="middle">Agent: own rows · Flow: active rows</text>
+          <text class="sub" x="815" y="377" text-anchor="middle">Subscriber / Processor roles</text>
         </g>
         <text class="lane-label" x="945" y="350" style="fill:var(--data)">STATE</text>
 
         <g>
           <rect x="700" y="410" width="230" height="52" rx="10" fill="var(--deliver-soft)" stroke="var(--deliver)"/>
           <text x="815" y="433" text-anchor="middle" font-weight="700" font-size="13">Microsoft Teams</text>
-          <text class="sub" x="815" y="450" text-anchor="middle">Post card as Flow bot · channel</text>
+          <text class="sub" x="815" y="450" text-anchor="middle">Flow bot · stored channel only</text>
         </g>
         <g>
           <rect x="700" y="472" width="230" height="52" rx="10" fill="var(--deliver-soft)" stroke="var(--deliver)"/>
           <text x="815" y="495" text-anchor="middle" font-weight="700" font-size="13">Microsoft 365 Outlook</text>
-          <text class="sub" x="815" y="512" text-anchor="middle">Send an email (V2)</text>
+          <text class="sub" x="815" y="512" text-anchor="middle">Allowed tenant domains only</text>
         </g>
-        <text class="lane-label" x="945" y="470" style="fill:var(--deliver)">DELIVERY</text>
+        <text class="lane-label" x="945" y="470" style="fill:var(--deliver)">DELIVERY (FLOW ONLY)</text>
 
         <g>
           <rect class="box" x="1030" y="62" width="145" height="216" rx="10"/>
@@ -301,14 +302,16 @@
         <path class="edge" d="M190,106 C225,106 225,121 255,121"/>
         <text class="edge-label" x="196" y="96">chat (SSO)</text>
         <path class="edge sched" d="M190,446 C225,446 225,458 255,458"/>
-        <text class="edge-label" x="32" y="392" style="fill:var(--warn)">weekly invoke →</text>
+        <text class="edge-label" x="32" y="372" style="fill:var(--warn)">invoke once to retrieve →</text>
 
         <path class="edge" d="M635,94 C665,94 670,94 700,94"/>
         <path class="edge" d="M635,121 C668,121 668,170 700,170"/>
         <path class="edge" d="M635,150 C668,150 668,246 700,246"/>
         <path class="edge" d="M635,350 C668,350 668,346 700,346"/>
-        <path class="edge" d="M635,436 C668,436 668,436 700,436"/>
-        <path class="edge" d="M635,480 C668,480 668,498 700,498"/>
+        <path class="edge sched" d="M110,492 L110,530 L668,530 C684,530 684,392 700,392" style="marker-end:url(#arrow-warn)"/>
+        <path class="edge sched" d="M668,530 C686,530 686,436 700,436"/>
+        <path class="edge sched" d="M668,530 C686,530 686,498 700,498"/>
+        <text class="edge-label" x="300" y="524" style="fill:var(--warn)">flow reads active rows, delivers cards and allowlisted email, records status</text>
         <path class="edge" d="M930,94 L1030,94"/>
         <path class="edge" d="M930,170 L1030,170"/>
         <path class="edge" d="M930,246 L1030,246"/>
@@ -406,24 +409,24 @@
 
       <div class="tabpanel" role="tabpanel" id="t3" aria-labelledby="b3" hidden>
         <ol class="steps">
-          <li><div class="who" style="--c:var(--data)">Lookup</div>Every review, update, test, or disable request starts with an owner-scoped <code>Get admin digest subscriptions</code>.</li>
-          <li><div class="who">Validate</div>Requires at least one supported product and one delivery method, plus Teams team and channel or valid email recipients.</li>
+          <li><div class="who" style="--c:var(--data)">Lookup</div>Every review, update, preview, or disable request starts with <code>Get admin digest subscriptions</code>. Its table, columns, and owner filter (<code>owninguser/azureactivedirectoryobjectid eq System.User.Id</code>) are fixed values, so the model can't widen the query.</li>
+          <li><div class="who">Validate</div>Requires at least one supported product and one delivery method, plus Teams team and channel or valid email recipients. Warns about recipients outside the tenant's domains.</li>
           <li><div class="who">Confirm</div>Summarizes the values or changes and waits for explicit confirmation before any write.</li>
           <li><div class="who" style="--c:var(--data)">Write</div>Creates or updates only the caller's row, changing only the fields they asked for. Disable sets <code>Active = No</code> and keeps history.</li>
-          <li><div class="who" style="--c:var(--deliver)">Test</div>Runs <code>weekly-admin-digest</code> for that profile only, labels it a test, and reports each delivery separately.</li>
+          <li><div class="who" style="--c:var(--deliver)">Preview</div>Runs <code>weekly-admin-digest</code> in interactive preview mode and shows the digest in chat. Nothing is sent; delivery belongs to the flow.</li>
         </ol>
       </div>
 
       <div class="tabpanel" role="tabpanel" id="t4" aria-labelledby="b4" hidden>
         <ol class="steps">
-          <li><div class="who" style="--c:var(--warn)">Trigger</div><code>Daily-MC-Trigger</code> runs weekly and invokes the agent with the scheduled time as the digest end time.</li>
-          <li><div class="who" style="--c:var(--data)">Subscriptions</div>Loads active, due rows and processes each one independently so one failure doesn't block the others.</li>
-          <li><div class="who" style="--c:var(--enterprise)">Collect</div>Queries Message Center for the rolling 7-day window in the subscription's time zone.</li>
-          <li><div class="who">Filter</div>Product ∈ selected products AND category ∈ {planForChange, preventOrFixIssue} AND tag = Admin impact. Missing values never match.</li>
-          <li><div class="who">Organize</div>Deduplicates by post ID, groups by category → major change (Yes first), and sorts by action or rollout date.</li>
-          <li><div class="who" style="--c:var(--learn)">Enrich</div>Adds Microsoft Learn guidance only for clearly matching posts that lack actionable detail.</li>
-          <li><div class="who" style="--c:var(--deliver)">Deliver</div>Posts an Adaptive Card 1.4 to the stored Teams channel and/or sends the email. Sends a no-result digest when nothing qualifies.</li>
-          <li><div class="who" style="--c:var(--data)">Record</div>Writes <code>Last Delivery At</code> and <code>Last Delivery Status</code>. Partial failures are reported per channel.</li>
+          <li><div class="who" style="--c:var(--warn)">Trigger</div><code>Daily-MC-Trigger</code> runs weekly. The reporting window is the seven days ending at the scheduled run time.</li>
+          <li><div class="who" style="--c:var(--enterprise)">Retrieve (agent, once)</div>Invokes the agent once, with a fixed Microsoft Graph request and a structured output schema. The agent returns every post with short impact and action summaries, and sends nothing.</li>
+          <li><div class="who">Filter (flow)</div>category ∈ {planForChange, preventOrFixIssue} AND tag = Admin impact, case-insensitive. Missing values never match. Exact duplicates are removed.</li>
+          <li><div class="who">Order (flow)</div>Sorted by group (Plan for change / Prevent or fix issue × Major Yes / No), then action date (soonest first), then last modified (newest first).</li>
+          <li><div class="who" style="--c:var(--data)">Per subscription (flow)</div>Keeps posts whose services match the selected products, case-insensitive. Each subscription is isolated, so one failure doesn't block the others.</li>
+          <li><div class="who" style="--c:var(--deliver)">Render (flow)</div>Adaptive Card 1.4 built from a fixed template, at most 10 posts per card, with text truncated. A compact card is used above 27,000 characters, so no card reaches 28 KB.</li>
+          <li><div class="who" style="--c:var(--deliver)">Deliver (flow)</div>Posts cards to the stored team and channel. Emails only recipients whose domain is in <code>Allowed Recipient Domains</code>; all others are skipped and counted.</li>
+          <li><div class="who" style="--c:var(--data)">Record (flow)</div>Writes <code>Last Delivery At</code> and a per-channel <code>Last Delivery Status</code>. If retrieval fails, nothing is sent and every active subscription records the failure.</li>
         </ol>
       </div>
     </div>
@@ -431,7 +434,7 @@
 
   <section id="data">
     <h2><span class="num">04</span> Data model: <code>sample_admindigestsubscription</code></h2>
-    <p class="lead">A user-owned Dataverse table. Rows are scoped by owner, and least-privilege security roles are the real enforcement boundary; tool instructions alone are not.</p>
+    <p class="lead">A user-owned Dataverse table. The <strong>Admin Digest Subscriber</strong> role (user level) limits each administrator to their own rows. The <strong>Admin Digest Processor</strong> role (organization level) is only for the flow's owner account.</p>
     <div class="panel">
       <div class="table-wrap">
         <table>
@@ -445,12 +448,12 @@
             <tr><td>Email Enabled</td><td><code>sample_emailenabled</code></td><td>Yes/No</td><td>User</td></tr>
             <tr><td>Email Recipients</td><td><code>sample_emailrecipients</code></td><td>Text, <code>; </code>-separated</td><td>User</td></tr>
             <tr><td>Subscriber Email</td><td><code>sample_subscriberemail</code></td><td>Text</td><td>User</td></tr>
-            <tr><td>Schedule Day</td><td><code>sample_scheduleday</code></td><td>Choice (Mon <code>410710000</code> … Sun <code>410710006</code>)</td><td>User</td></tr>
-            <tr><td>Schedule Time</td><td><code>sample_scheduletime</code></td><td>Text, <code>HH:mm</code></td><td>User</td></tr>
-            <tr><td>Time Zone</td><td><code>sample_timezone</code></td><td>Text (Windows time-zone name)</td><td>User</td></tr>
+            <tr><td>Schedule Day</td><td><code>sample_scheduleday</code></td><td>Choice (Mon <code>410710000</code> … Sun <code>410710006</code>), recorded preference</td><td>User</td></tr>
+            <tr><td>Schedule Time</td><td><code>sample_scheduletime</code></td><td>Text, <code>HH:mm</code>, recorded preference</td><td>User</td></tr>
+            <tr><td>Time Zone</td><td><code>sample_timezone</code></td><td>Text (Windows time-zone name), used for the displayed reporting period</td><td>User</td></tr>
             <tr><td>Active</td><td><code>sample_active</code></td><td>Yes/No</td><td>User</td></tr>
-            <tr><td>Last Delivery At</td><td><code>sample_lastdeliveryat</code></td><td>Date and time</td><td>Scheduled run</td></tr>
-            <tr><td>Last Delivery Status</td><td><code>sample_lastdeliverystatus</code></td><td>Text</td><td>Scheduled run</td></tr>
+            <tr><td>Last Delivery At</td><td><code>sample_lastdeliveryat</code></td><td>Date and time</td><td>Digest flow</td></tr>
+            <tr><td>Last Delivery Status</td><td><code>sample_lastdeliverystatus</code></td><td>Text, per channel (for example "Email sent to 2 recipient(s); skipped 1 …")</td><td>Digest flow</td></tr>
             <tr><td>Owner</td><td><code>ownerid</code></td><td>User or team</td><td>Dataverse</td></tr>
           </tbody>
         </table>
@@ -463,8 +466,8 @@
     <div class="grid-2">
       <div class="guard" style="--c:var(--accent);--cs:var(--accent-soft)"><div class="ico">ID</div><div><b>Identity</b><p>Integrated (Entra ID) authentication is always required, and access is limited by group membership.</p></div></div>
       <div class="guard" style="--c:var(--enterprise);--cs:var(--enterprise-soft)"><div class="ico">INV</div><div><b>Invoker connections</b><p>Every tool runs as the signed-in user, so connector permissions define the reachable data.</p></div></div>
-      <div class="guard" style="--c:var(--data);--cs:var(--data-soft)"><div class="ico">DV</div><div><b>Row ownership</b><p>Subscriptions are user-owned. The agent never accepts a user-supplied row ID and uses only IDs from the owner-scoped lookup.</p></div></div>
-      <div class="guard" style="--c:var(--deliver);--cs:var(--deliver-soft)"><div class="ico">TX</div><div><b>Delivery scope</b><p>Teams and email go only to destinations stored on the subscription being processed. Success is reported only after the action succeeds.</p></div></div>
+      <div class="guard" style="--c:var(--data);--cs:var(--data-soft)"><div class="ico">DV</div><div><b>Fixed owner filter + roles</b><p>The subscription lookup's table, columns, and owner filter are fixed values the model can't change. The Subscriber role enforces own-rows-only access in Dataverse.</p></div></div>
+      <div class="guard" style="--c:var(--deliver);--cs:var(--deliver-soft)"><div class="ico">TX</div><div><b>Flow-only, tenant-only delivery</b><p>The agent has no email or Teams tool. The flow emails only recipients in <code>Allowed Recipient Domains</code> (your tenant's domains) and posts only to the stored channel.</p></div></div>
       <div class="guard" style="--c:var(--learn);--cs:var(--learn-soft)"><div class="ico">RO</div><div><b>Read-only tenant access</b><p>The agent never claims to acknowledge, dismiss, or remediate a tenant item.</p></div></div>
       <div class="guard" style="--c:var(--release);--cs:var(--release-soft)"><div class="ico">PII</div><div><b>No leakage</b><p>Never exposes credentials, connection details, internal identifiers, or raw tool payloads. The package ships sanitized placeholders.</p></div></div>
     </div>
@@ -485,15 +488,15 @@
             <tr><td>MCP-Server-for-Enterprise</td><td>MCP tool (custom connector)</td><td><span class="pill" style="--c:var(--enterprise);--cs:var(--enterprise-soft)">Evidence</span></td><td><a href="../capabilities/tools/MCP-Server-for-Enterprise_PPB.mcs.yml"><code>capabilities/tools/MCP-Server-for-Enterprise_PPB.mcs.yml</code></a></td></tr>
             <tr><td>Release Communication Server</td><td>MCP tool (custom connector)</td><td><span class="pill" style="--c:var(--release);--cs:var(--release-soft)">Evidence</span></td><td><a href="../capabilities/tools/ReleaseCommunicationServer_QAL.mcs.yml"><code>capabilities/tools/ReleaseCommunicationServer_QAL.mcs.yml</code></a></td></tr>
             <tr><td>Microsoft Learn Docs MCP Server</td><td>MCP tool (certified connector)</td><td><span class="pill" style="--c:var(--learn);--cs:var(--learn-soft)">Evidence</span></td><td><a href="../capabilities/tools/MicrosoftLearnDocsMCP-MicrosoftLearnDocsMCPServer_l9i.mcs.yml"><code>capabilities/tools/MicrosoftLearnDocsMCP-…_l9i.mcs.yml</code></a></td></tr>
-            <tr><td>Get admin digest subscriptions</td><td>Dataverse · List rows</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td><a href="../capabilities/tools/Listrowsfromselectedenvironment_Pkp.mcs.yml"><code>capabilities/tools/Listrows…_Pkp.mcs.yml</code></a></td></tr>
+            <tr><td>Get admin digest subscriptions</td><td>Dataverse · List rows (fixed owner filter)</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td><a href="../capabilities/tools/Listrowsfromselectedenvironment_Pkp.mcs.yml"><code>capabilities/tools/Listrows…_Pkp.mcs.yml</code></a></td></tr>
             <tr><td>Create my admin digest subscription</td><td>Dataverse · Add a new row</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td><a href="../capabilities/tools/Addanewrowtoselectedenvironment_c-_.mcs.yml"><code>capabilities/tools/Addanewrow…_c-_.mcs.yml</code></a></td></tr>
             <tr><td>Update my admin digest subscription</td><td>Dataverse · Update a row</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td><a href="../capabilities/tools/Updatearowinselectedenvironment_Ao0.mcs.yml"><code>capabilities/tools/Updatearow…_Ao0.mcs.yml</code></a></td></tr>
-            <tr><td>Post weekly admin digest card</td><td>Teams · Post card in a chat or channel</td><td><span class="pill" style="--c:var(--deliver);--cs:var(--deliver-soft)">Delivery</span></td><td><a href="../capabilities/tools/Postcardinachatorchannel_pyB.mcs.yml"><code>capabilities/tools/Postcard…_pyB.mcs.yml</code></a></td></tr>
-            <tr><td>Send an email (V2)</td><td>Office 365 Outlook</td><td><span class="pill" style="--c:var(--deliver);--cs:var(--deliver-soft)">Delivery</span></td><td><a href="../capabilities/tools/SendanemailV2_61z.mcs.yml"><code>capabilities/tools/SendanemailV2_61z.mcs.yml</code></a></td></tr>
-            <tr><td>Daily-MC-Trigger</td><td>Cloud flow · weekly recurrence → invoke agent</td><td><span class="pill" style="--c:var(--warn);--cs:var(--learn-soft)">Orchestration</span></td><td>Solution package only</td></tr>
+            <tr><td>Daily-MC-Trigger</td><td>Agent flow: retrieve via agent → filter → render → deliver → record</td><td><span class="pill" style="--c:var(--warn);--cs:var(--learn-soft)">Orchestration</span></td><td>Solution package only</td></tr>
             <tr><td>Admin Digest Subscriptions</td><td>Dataverse table (user-owned)</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td>Solution package only</td></tr>
+            <tr><td>Admin Digest Subscriber / Processor</td><td>Security roles (user-level / organization-level)</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">Security</span></td><td>Solution package only</td></tr>
+            <tr><td>Allowed Recipient Domains</td><td>Environment variable <code>sample_AllowedRecipientDomains</code> (set to your tenant's domains)</td><td><span class="pill" style="--c:var(--deliver);--cs:var(--deliver-soft)">Security</span></td><td>Solution package only</td></tr>
             <tr><td>Custom connectors (2)</td><td>Enterprise and Release Communication MCP</td><td><span class="pill" style="--c:var(--enterprise);--cs:var(--enterprise-soft)">Connector</span></td><td><a href="../connectors/"><code>connectors/</code></a></td></tr>
-            <tr><td>Connection references (6)</td><td>Dataverse, Learn, Outlook, Enterprise, Release, Teams</td><td><span class="pill" style="--c:var(--muted);--cs:var(--bg)">Infra</span></td><td><a href="../infrastructure/connections/"><code>infrastructure/connections/</code></a></td></tr>
+            <tr><td>Connection references (7)</td><td>Agent: Dataverse, Learn, Enterprise, Release · Flow: Copilot Studio, Dataverse, Teams, Outlook</td><td><span class="pill" style="--c:var(--muted);--cs:var(--bg)">Infra</span></td><td><a href="../infrastructure/connections/"><code>infrastructure/connections/</code></a></td></tr>
             <tr><td>Importable solution</td><td>Unmanaged, <code>sample</code> publisher</td><td><span class="pill" style="--c:var(--muted);--cs:var(--bg)">Package</span></td><td><a href="../solution/AdminUpdatesAgents_1_0_0_0.zip"><code>solution/AdminUpdatesAgents_1_0_0_0.zip</code></a></td></tr>
           </tbody>
         </table>
@@ -510,12 +513,13 @@
         <li><label><input type="checkbox" data-k="c1"><span>Create or pick a <strong>development</strong> Power Platform environment</span></label></li>
         <li><label><input type="checkbox" data-k="c2"><span>Verify the ZIP against <code>solution/SHA256SUMS.txt</code></span></label></li>
         <li><label><input type="checkbox" data-k="c3"><span>Import the solution through Power Apps → Solutions → Import (or <code>pac solution import</code>)</span></label></li>
+        <li><label><input type="checkbox" data-k="c11"><span>Set <strong>Allowed Recipient Domains</strong> (<code>sample_AllowedRecipientDomains</code>) to <strong>your tenant's email domains</strong>, for example <code>contoso.com;contoso.onmicrosoft.com</code></span></label></li>
         <li><label><input type="checkbox" data-k="c4"><span>Replace the Enterprise connector's placeholder tenant ID and federated identity subject</span></label></li>
-        <li><label><input type="checkbox" data-k="c5"><span>Create and bind all six connections, and test each one</span></label></li>
-        <li><label><input type="checkbox" data-k="c6"><span>Assign least-privilege Dataverse roles for <code>Admin Digest Subscriptions</code></span></label></li>
+        <li><label><input type="checkbox" data-k="c5"><span>Create and bind all connections. The digest flow's Dataverse, Copilot Studio, Teams, and Outlook connections belong to a dedicated digest account.</span></label></li>
+        <li><label><input type="checkbox" data-k="c6"><span>Assign <strong>Admin Digest Subscriber</strong> to agent users and <strong>Admin Digest Processor</strong> to the digest account only</span></label></li>
         <li><label><input type="checkbox" data-k="c7"><span>Select a model available in the environment and revalidate the agent</span></label></li>
-        <li><label><input type="checkbox" data-k="c8"><span>Run the test scenarios: lookups, past-due roadmap, conflicts, subscription CRUD, delivery modes, denial cases</span></label></li>
-        <li><label><input type="checkbox" data-k="c9"><span>Review the <code>Daily-MC-Trigger</code> recurrence, then enable it</span></label></li>
+        <li><label><input type="checkbox" data-k="c8"><span>Run the test scenarios: lookups, past-due roadmap, conflicts, subscription CRUD and preview, delivery modes, external recipients skipped, denial cases</span></label></li>
+        <li><label><input type="checkbox" data-k="c9"><span>Review the <code>Daily-MC-Trigger</code> recurrence, run it once manually in dev, check Last Delivery Status, then turn it on</span></label></li>
         <li><label><input type="checkbox" data-k="c10"><span>Publish the agent deliberately and share it with the intended group</span></label></li>
       </ul>
     </div>
@@ -524,10 +528,9 @@
   <section id="gaps">
     <h2><span class="num">08</span> Known gaps and next steps</h2>
     <div class="grid-3">
-      <div class="panel gap" style="--c:var(--warn)"><div class="sev">Scheduling</div><h3>Per-subscription schedule isn't honored</h3><p>The flow runs once a week (Monday 08:00 Central), so the stored day, time, and time zone only shape the reporting window. An hourly trigger that selects due rows would honor each schedule.</p></div>
-      <div class="panel gap" style="--c:var(--warn)"><div class="sev">Determinism</div><h3>Filtering is model-driven</h3><p>Category, tag, and product filters are applied by the model. Filtering in the flow before summarizing would make results reproducible.</p></div>
-      <div class="panel gap" style="--c:var(--bad)"><div class="sev">Authorization</div><h3>Owner scope is set by prompts</h3><p>The Dataverse <code>$filter</code> is written by the model. Fix it in a flow or topic (<code>_ownerid_value eq User().Id</code>) and rely on Dataverse roles.</p></div>
-      <div class="panel gap" style="--c:var(--warn)"><div class="sev">Delivery</div><h3>Email and Teams tools are general-purpose</h3><p>Recipients and channels are limited only by instructions. Consider moving delivery into the flow, or allowlisting tenant domains.</p></div>
+      <div class="panel gap" style="--c:var(--warn)"><div class="sev">Scheduling</div><h3>Per-subscription schedule isn't honored</h3><p>The flow runs once a week (Monday 08:00 Central) for every active subscription. The stored day and time are preferences only. An hourly trigger that selects due rows would honor each schedule.</p></div>
+      <div class="panel gap" style="--c:var(--warn)"><div class="sev">Retrieval</div><h3>Post retrieval still goes through the model</h3><p>The flow filters and renders deterministically, but it relies on the agent returning every post the Graph request returned. A post the model omits can't be recovered. Spot-check against Message Center.</p></div>
+      <div class="panel gap" style="--c:var(--ok)"><div class="sev">Resolved</div><h3>Owner scope, delivery scope, determinism</h3><p>Fixed owner filter and Subscriber/Processor roles; no agent delivery tools; tenant domain allowlist; deterministic filter, sort, and card template in the flow.</p></div>
       <div class="panel gap" style="--c:var(--accent)"><div class="sev">Quality</div><h3>No evaluation set</h3><p>Add a Copilot Studio test set that covers the SETUP.md scenarios, and run it before each release.</p></div>
       <div class="panel gap" style="--c:var(--accent)"><div class="sev">ALM</div><h3>Flow and table are ZIP-only</h3><p>Unpack the solution into source (<code>pac solution unpack</code>) and add CI that packs, checks, and hashes the ZIP.</p></div>
     </div>

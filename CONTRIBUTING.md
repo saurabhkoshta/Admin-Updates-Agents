@@ -18,7 +18,9 @@ Behavior changes should preserve these guarantees:
 - Public roadmap information does not prove tenant availability.
 - Microsoft Learn provides documentation, not tenant applicability.
 - Conflicting source values remain visible and attributed.
-- Subscription actions operate only on the authenticated user's Dataverse rows.
+- Subscription actions operate only on the authenticated user's Dataverse rows. Keep the fixed owner filter on `Get admin digest subscriptions`.
+- The agent has no delivery tools. Only the `Daily-MC-Trigger` flow sends digests, and it emails only recipients in `Allowed Recipient Domains`.
+- Digest filtering, ordering, and rendering stay deterministic in the flow. The agent retrieves and summarizes posts only.
 - Delivery success is reported only after the corresponding action succeeds.
 
 ## Validation

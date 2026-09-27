@@ -1,6 +1,6 @@
 mcs.metadata:
   componentName: Get admin digest subscriptions
-  description: Retrieves the authenticated administrator subscription or active due subscriptions from the Admin Digest Subscriptions table in the current environment.
+  description: Retrieves the signed-in administrator's own Admin Digest Subscription rows. The table, owner filter, and columns are fixed, so it never returns another user's subscription.
 kind: ConnectorTool
 authMode: Invoker
 connectionReference: sample_adminupdatesagent.cr.shared_commondataserviceforapps
@@ -11,13 +11,13 @@ toolInputs:
     description: Use the current Power Platform environment that contains this imported agent and its solution. Never use or request an environment GUID.
 
   - name: entityName
-    description: Always use the Admin Digest Subscriptions table with logical name sample_admindigestsubscription. Never query another table.
+    fixedValue: ="sample_admindigestsubscriptions"
 
   - name: $select
-    description: Return only sample_admindigestsubscriptionid, sample_newcolumn, sample_selectedproducts, sample_teamsenabled, sample_teamsteamid, sample_teamschannelid, sample_teamschannelname, sample_emailenabled, sample_emailrecipients, sample_scheduleday, sample_scheduletime, sample_timezone, sample_active, sample_lastdeliveryat, sample_lastdeliverystatus, and _ownerid_value.
+    fixedValue: ="sample_admindigestsubscriptionid,sample_newcolumn,sample_selectedproducts,sample_teamsenabled,sample_teamsteamid,sample_teamschannelid,sample_teamschannelname,sample_emailenabled,sample_emailrecipients,sample_scheduleday,sample_scheduletime,sample_timezone,sample_active,sample_lastdeliveryat,sample_lastdeliverystatus"
 
   - name: $filter
-    description: For an interactive request, return only rows owned by the authenticated user. For scheduled processing, return only active subscriptions due for that run. Never retrieve another user profile interactively.
+    fixedValue: ="owninguser/azureactivedirectoryobjectid eq " & System.User.Id
 
   - name: $top
-    description: Return no more than 100 subscription rows.
+    fixedValue: =10
