@@ -15,6 +15,17 @@ This is an independent community reference implementation. It is not developed, 
 - Manage per-user weekly digest preferences in Dataverse, and preview a digest in chat.
 - Deliver filtered weekly digests through Microsoft Teams and email from a scheduled flow. Filtering, rendering, and delivery are deterministic, and email goes only to your tenant's allowed domains.
 
+## Usage modes
+
+The same solution supports two ways of working, separately or together. In both, every administrator can chat with the agent about any product, with or without a subscription.
+
+| Mode | Who configures it | What administrators get |
+| --- | --- | --- |
+| **Personalized** | Each administrator, by chatting with the agent | A personal subscription row with chosen products (or all products, by leaving the selection empty), Teams channel and/or email recipients, and time zone. |
+| **Shared (all updates)** | One administrator, once, in environment variables | One all-products digest per run to a shared Teams channel and/or email list, for example an "M365 Admins" channel. No per-admin setup and no subscription needed. |
+
+Both modes use the same filters (Plan for change or Prevent or fix issue, tagged Admin impact), card template, 28 KB card limit, and tenant-domain email allowlist. Leave the Shared Digest variables as `none` for a personalized-only deployment. Skip subscriptions (and the Subscriber role) for a shared-only deployment. See [Choose a usage mode](SETUP.md#choose-a-usage-mode).
+
 ## Installation
 
 Download [AdminUpdatesAgents_1_0_0_0.zip](solution/AdminUpdatesAgents_1_0_0_0.zip), then import it through **Power Apps > Solutions > Import solution**. During import, bind the required connections and review all environment-specific settings before publishing the agent.
@@ -41,8 +52,8 @@ flowchart LR
     Agent --> Learn[Microsoft Learn Docs MCP Server]
     Agent -->|own rows only| Dataverse[Dataverse subscriptions]
     Flow -->|all active rows| Dataverse
-    Flow -->|Adaptive Cards| Teams[Microsoft Teams]
-    Flow -->|allowed domains only| Email[Microsoft 365 Outlook email]
+    Flow -->|personal + shared Adaptive Cards| Teams[Microsoft Teams]
+    Flow -->|personal + shared, allowed domains only| Email[Microsoft 365 Outlook email]
 
     Enterprise --> Tenant[Tenant communications and service health]
     Release --> Public[Roadmap and Azure updates]
@@ -83,7 +94,7 @@ See [SETUP.md](SETUP.md) for environment preparation and connection rebinding.
 
 ## Important portability notes
 
-The package under `solution/` includes the agent, the `Admin Digest Subscriptions` table, the `Daily-MC-Trigger` flow, two security roles, the `Allowed Recipient Domains` environment variable (with no value), custom connectors, and connection references. It uses the generic `sample` publisher prefix and does not contain source-tenant IDs, tenant domains, user identities, environment URLs, connection instances, or signed asset URLs.
+The package under `solution/` includes the agent, the `Admin Digest Subscriptions` table, the `Daily-MC-Trigger` flow, two security roles, the `Allowed Recipient Domains` environment variable (with no value), three optional `Shared Digest` environment variables (default `none`), custom connectors, and connection references. It uses the generic `sample` publisher prefix and does not contain source-tenant IDs, tenant domains, user identities, environment URLs, connection instances, or signed asset URLs.
 
 The MCP Server for Enterprise connector intentionally contains placeholders for the target tenant ID and federated identity subject. Configure these values for your tenant before creating its connection. The imported connections must also be bound to identities in the target environment.
 

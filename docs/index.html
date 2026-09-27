@@ -144,6 +144,7 @@
     <div class="brand"><img src="../icon.png" alt=""> Admin Updates Agent</div>
     <nav class="links" aria-label="Sections">
       <a href="#overview">Overview</a>
+      <a href="#modes">Usage modes</a>
       <a href="#architecture">Architecture</a>
       <a href="#evidence">Evidence model</a>
       <a href="#flows">How it works</a>
@@ -188,6 +189,34 @@
     </div>
   </section>
 
+  <section id="modes">
+    <h2><span class="num">00</span> Usage modes</h2>
+    <p class="lead">One solution, two ways to receive digests, usable separately or together. In both modes every administrator can chat with the agent about any product, with or without a subscription.</p>
+    <div class="grid-2">
+      <div class="panel source" style="--c:var(--data);--cs:var(--data-soft)">
+        <span class="tag">Mode 1 · Personalized</span>
+        <h3>Each administrator chooses their updates</h3>
+        <ul>
+          <li>Admins create a subscription <strong>by chatting with the agent</strong>: products, Teams channel and/or email, time zone.</li>
+          <li>Leave products empty to get <strong>all products</strong>.</li>
+          <li>Each subscription gets its own digest and <code>Last Delivery Status</code>.</li>
+          <li>Needs the <strong>Admin Digest Subscriber</strong> role for each admin.</li>
+        </ul>
+      </div>
+      <div class="panel source" style="--c:var(--warn);--cs:var(--learn-soft)">
+        <span class="tag">Mode 2 · Shared (all updates)</span>
+        <h3>Everyone gets everything, nothing to configure per admin</h3>
+        <ul>
+          <li>One administrator sets the <strong>Shared Digest</strong> environment variables once: team ID + channel ID and/or email recipients.</li>
+          <li>Each run sends one <strong>all-products</strong> digest to that channel or list.</li>
+          <li>No subscriptions or Subscriber role needed. The result is recorded in the flow run (<code>Shared_digest_status</code>).</li>
+          <li>Leave the variables as <code>none</code> to turn it off.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="disclaimer">Both modes use the same filters (Plan for change or Prevent or fix issue, tagged Admin impact), card template, 28 KB card limit, and tenant-domain email allowlist.</p>
+  </section>
+
   <section id="architecture">
     <h2><span class="num">01</span> Architecture</h2>
     <p class="lead">Administrators chat with the agent interactively. A weekly flow invokes the agent once to retrieve Message Center posts, then filters, renders, and delivers the digest itself. The agent's tools run with invoker (user) authentication, and each MCP server has one distinct evidence role. The agent has no email or Teams tool.</p>
@@ -213,12 +242,13 @@
           <text class="sub" x="110" y="120" text-anchor="middle">Teams · M365 Copilot · web</text>
         </g>
         <g>
-          <rect class="box" x="30" y="380" width="160" height="112" rx="10" style="stroke:var(--warn)"/>
+          <rect class="box" x="30" y="380" width="160" height="122" rx="10" style="stroke:var(--warn)"/>
           <text x="110" y="404" text-anchor="middle" font-weight="700" font-size="14">Daily-MC-Trigger</text>
           <text class="sub" x="110" y="423" text-anchor="middle">Weekly · Mon 08:00 Central</text>
           <text class="sub" x="110" y="440" text-anchor="middle">Filter · sort · dedupe</text>
           <text class="sub" x="110" y="457" text-anchor="middle">Card template (&lt; 28 KB)</text>
           <text class="sub" x="110" y="474" text-anchor="middle">Tenant domain allowlist</text>
+          <text class="sub" x="110" y="491" text-anchor="middle">Personal + shared digests</text>
         </g>
 
         <g>
@@ -308,7 +338,7 @@
         <path class="edge" d="M635,121 C668,121 668,170 700,170"/>
         <path class="edge" d="M635,150 C668,150 668,246 700,246"/>
         <path class="edge" d="M635,350 C668,350 668,346 700,346"/>
-        <path class="edge sched" d="M110,492 L110,530 L668,530 C684,530 684,392 700,392" style="marker-end:url(#arrow-warn)"/>
+        <path class="edge sched" d="M110,502 L110,530 L668,530 C684,530 684,392 700,392" style="marker-end:url(#arrow-warn)"/>
         <path class="edge sched" d="M668,530 C686,530 686,436 700,436"/>
         <path class="edge sched" d="M668,530 C686,530 686,498 700,498"/>
         <text class="edge-label" x="300" y="524" style="fill:var(--warn)">flow reads active rows, delivers cards and allowlisted email, records status</text>
@@ -423,7 +453,8 @@
           <li><div class="who" style="--c:var(--enterprise)">Retrieve (agent, once)</div>Invokes the agent once, with a fixed Microsoft Graph request and a structured output schema. The agent returns every post with short impact and action summaries, and sends nothing.</li>
           <li><div class="who">Filter (flow)</div>category ∈ {planForChange, preventOrFixIssue} AND tag = Admin impact, case-insensitive. Missing values never match. Exact duplicates are removed.</li>
           <li><div class="who">Order (flow)</div>Sorted by group (Plan for change / Prevent or fix issue × Major Yes / No), then action date (soonest first), then last modified (newest first).</li>
-          <li><div class="who" style="--c:var(--data)">Per subscription (flow)</div>Keeps posts whose services match the selected products, case-insensitive. Each subscription is isolated, so one failure doesn't block the others.</li>
+          <li><div class="who" style="--c:var(--data)">Per subscription (flow)</div>Keeps posts whose services match the selected products, case-insensitive; an empty selection means all products. Each subscription is isolated, so one failure doesn't block the others.</li>
+          <li><div class="who" style="--c:var(--warn)">Shared digest (flow)</div>If any Shared Digest variable is set, sends one all-products digest to the shared team channel and/or email list, using the same rendering and allowlist.</li>
           <li><div class="who" style="--c:var(--deliver)">Render (flow)</div>Adaptive Card 1.4 built from a fixed template, at most 10 posts per card, with text truncated. A compact card is used above 27,000 characters, so no card reaches 28 KB.</li>
           <li><div class="who" style="--c:var(--deliver)">Deliver (flow)</div>Posts cards to the stored team and channel. Emails only recipients whose domain is in <code>Allowed Recipient Domains</code>; all others are skipped and counted.</li>
           <li><div class="who" style="--c:var(--data)">Record (flow)</div>Writes <code>Last Delivery At</code> and a per-channel <code>Last Delivery Status</code>. If retrieval fails, nothing is sent and every active subscription records the failure.</li>
@@ -441,7 +472,7 @@
           <thead><tr><th>Column</th><th>Logical name</th><th>Type</th><th>Written by</th></tr></thead>
           <tbody>
             <tr><td>Subscription Name</td><td><code>sample_newcolumn</code></td><td>Text (primary name)</td><td>User</td></tr>
-            <tr><td>Selected Products</td><td><code>sample_selectedproducts</code></td><td>Text, <code>; </code>-separated labels</td><td>User</td></tr>
+            <tr><td>Selected Products</td><td><code>sample_selectedproducts</code></td><td>Text, <code>; </code>-separated labels; empty = all products</td><td>User</td></tr>
             <tr><td>Teams Enabled</td><td><code>sample_teamsenabled</code></td><td>Yes/No</td><td>User</td></tr>
             <tr><td>Teams Team ID</td><td><code>sample_teamsteamid</code></td><td>Text</td><td>User</td></tr>
             <tr><td>Teams Channel ID / Name</td><td><code>sample_teamschannelid</code>, <code>sample_teamschannelname</code></td><td>Text</td><td>User</td></tr>
@@ -495,6 +526,7 @@
             <tr><td>Admin Digest Subscriptions</td><td>Dataverse table (user-owned)</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td>Solution package only</td></tr>
             <tr><td>Admin Digest Subscriber / Processor</td><td>Security roles (user-level / organization-level)</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">Security</span></td><td>Solution package only</td></tr>
             <tr><td>Allowed Recipient Domains</td><td>Environment variable <code>sample_AllowedRecipientDomains</code> (set to your tenant's domains)</td><td><span class="pill" style="--c:var(--deliver);--cs:var(--deliver-soft)">Security</span></td><td>Solution package only</td></tr>
+            <tr><td>Shared Digest Team ID / Channel ID / Email Recipients</td><td>Environment variables <code>sample_SharedDigestTeamId</code>, <code>sample_SharedDigestChannelId</code>, <code>sample_SharedDigestRecipients</code> (default <code>none</code>)</td><td><span class="pill" style="--c:var(--warn);--cs:var(--learn-soft)">Mode 2</span></td><td>Solution package only</td></tr>
             <tr><td>Custom connectors (2)</td><td>Enterprise and Release Communication MCP</td><td><span class="pill" style="--c:var(--enterprise);--cs:var(--enterprise-soft)">Connector</span></td><td><a href="../connectors/"><code>connectors/</code></a></td></tr>
             <tr><td>Connection references (7)</td><td>Agent: Dataverse, Learn, Enterprise, Release · Flow: Copilot Studio, Dataverse, Teams, Outlook</td><td><span class="pill" style="--c:var(--muted);--cs:var(--bg)">Infra</span></td><td><a href="../infrastructure/connections/"><code>infrastructure/connections/</code></a></td></tr>
             <tr><td>Importable solution</td><td>Unmanaged, <code>sample</code> publisher</td><td><span class="pill" style="--c:var(--muted);--cs:var(--bg)">Package</span></td><td><a href="../solution/AdminUpdatesAgents_1_0_0_0.zip"><code>solution/AdminUpdatesAgents_1_0_0_0.zip</code></a></td></tr>
@@ -514,9 +546,10 @@
         <li><label><input type="checkbox" data-k="c2"><span>Verify the ZIP against <code>solution/SHA256SUMS.txt</code></span></label></li>
         <li><label><input type="checkbox" data-k="c3"><span>Import the solution through Power Apps → Solutions → Import (or <code>pac solution import</code>)</span></label></li>
         <li><label><input type="checkbox" data-k="c11"><span>Set <strong>Allowed Recipient Domains</strong> (<code>sample_AllowedRecipientDomains</code>) to <strong>your tenant's email domains</strong>, for example <code>contoso.com;contoso.onmicrosoft.com</code></span></label></li>
+        <li><label><input type="checkbox" data-k="c12"><span>Choose the usage mode: for an all-updates shared digest, set the <strong>Shared Digest</strong> team/channel and/or email variables; for personalized-only, leave them as <code>none</code></span></label></li>
         <li><label><input type="checkbox" data-k="c4"><span>Replace the Enterprise connector's placeholder tenant ID and federated identity subject</span></label></li>
         <li><label><input type="checkbox" data-k="c5"><span>Create and bind all connections. The digest flow's Dataverse, Copilot Studio, Teams, and Outlook connections belong to a dedicated digest account.</span></label></li>
-        <li><label><input type="checkbox" data-k="c6"><span>Assign <strong>Admin Digest Subscriber</strong> to agent users and <strong>Admin Digest Processor</strong> to the digest account only</span></label></li>
+        <li><label><input type="checkbox" data-k="c6"><span>Assign <strong>Admin Digest Subscriber</strong> to agent users (personalized mode) and <strong>Admin Digest Processor</strong> to the digest account only</span></label></li>
         <li><label><input type="checkbox" data-k="c7"><span>Select a model available in the environment and revalidate the agent</span></label></li>
         <li><label><input type="checkbox" data-k="c8"><span>Run the test scenarios: lookups, past-due roadmap, conflicts, subscription CRUD and preview, delivery modes, external recipients skipped, denial cases</span></label></li>
         <li><label><input type="checkbox" data-k="c9"><span>Review the <code>Daily-MC-Trigger</code> recurrence, run it once manually in dev, check Last Delivery Status, then turn it on</span></label></li>

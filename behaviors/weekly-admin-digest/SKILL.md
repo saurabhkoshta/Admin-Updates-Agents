@@ -7,7 +7,7 @@ description: Retrieves Message Center posts for the scheduled weekly admin diges
 
 The weekly digest has two parts:
 
-- The `Daily-MC-Trigger` flow owns scheduling, subscription selection, filtering, ordering, Adaptive Card and email rendering, recipient-domain allowlisting, delivery, and last-delivery status. Its logic is deterministic.
+- The `Daily-MC-Trigger` flow owns scheduling, subscription selection, filtering, ordering, Adaptive Card and email rendering, recipient-domain allowlisting, delivery, and last-delivery status. Its logic is deterministic. It sends a digest for each active personal subscription and, when an administrator has configured it, one shared all-products digest.
 - This skill only retrieves and summarizes Message Center posts for that flow, or previews a digest in chat.
 
 You have no email or Teams tool. Never claim that a digest was sent or posted.
@@ -29,19 +29,19 @@ Use this mode when the message starts with `Scheduled weekly-admin-digest data r
 
 ## Interactive preview mode
 
-Use this mode when a signed-in administrator asks to preview or test their digest, usually from `manage-admin-digest-subscription`.
+Use this mode when a signed-in administrator asks to preview or test their digest, usually from `manage-admin-digest-subscription`, or asks what this week's admin digest contains.
 
-1. Use the subscription returned by `Get admin digest subscriptions` for the signed-in user. Never preview another user's subscription.
+1. If the user has a subscription, use the row returned by `Get admin digest subscriptions` for the signed-in user. Never preview another user's subscription. If the user has no subscription, or asks for everything, preview all products; state the time zone you used (the user's stated time zone, otherwise UTC).
 2. Use the rolling seven days ending now. State the exact start and end timestamps and the subscription's time zone.
 3. Retrieve Message Center posts from `MCP-Server-for-Enterprise` for that window.
 4. Apply the same rules the flow applies:
    - Category is `planForChange` or `preventOrFixIssue` (case-insensitive).
    - At least one tag is `Admin impact` (case-insensitive).
-   - At least one returned service matches a selected product (case-insensitive). Never infer a product from the title.
+   - When the subscription has selected products, at least one returned service matches a selected product (case-insensitive). An empty selection means all products. Never infer a product from the title.
    - A missing category, tag, or service never matches.
 5. Group by `Plan for change` then `Prevent or fix issue`, and within each by `Major: Yes` then `Major: No`. Within a group, list posts with an action-required date first (soonest first), then the others by last-modified date (newest first).
 6. For each post, show the Message Center ID, title, services, timing, admin impact, Microsoft-stated action or `No explicit admin action provided`, and the Message Center link. Label any recommendation that Microsoft did not state as `Suggested admin consideration`.
-7. If nothing matches, say that no posts matched the selected products and both filters for the stated window. Do not claim that no Message Center posts exist.
+7. If nothing matches, say that no posts matched the selected products (or all products) and both filters for the stated window. Do not claim that no Message Center posts exist.
 8. End by explaining that this is a preview, and that delivery happens only through the scheduled `Daily-MC-Trigger` flow, which sends email only to recipients in the organization's allowed domains.
 
 ## Accuracy and safety

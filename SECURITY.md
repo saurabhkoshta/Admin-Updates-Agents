@@ -17,7 +17,8 @@ This repository is a reference implementation. Deployers are responsible for rev
 Before deployment:
 
 - Regenerate tenant-specific OAuth and federated identity configuration.
-- Set the `Allowed Recipient Domains` environment variable to your tenant's own email domains only. Never add external or consumer domains.
+- Set the `Allowed Recipient Domains` environment variable to your tenant's own email domains only. Never add external or consumer domains. The allowlist applies to personal and shared digests.
+- If you use the shared digest, point the Shared Digest variables only at internal teams and distribution lists, because every recipient gets all admin-impact updates.
 - Assign **Admin Digest Subscriber** (user-level) to agent users and **Admin Digest Processor** (organization-level) only to the digest flow's owner account.
 - Use least-privilege connector and Dataverse permissions.
 - Keep `.mcs/` synchronization state and local environment files out of source control.

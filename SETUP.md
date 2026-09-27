@@ -26,7 +26,8 @@ Create a development environment first. Do not test imported connection referenc
 3. Review the solution details and proceed through the import wizard.
 4. Select or create each required connection when prompted.
 5. When the wizard shows the **Allowed Recipient Domains** environment variable, enter your tenant's email domains. See [Set your tenant's allowed email domains](#set-your-tenants-allowed-email-domains) below.
-6. Wait for the import to complete, then review all warnings before enabling flows or publishing the agent.
+6. If you want the shared all-updates digest, set the **Shared Digest** environment variables. Otherwise leave them as `none`. See [Choose a usage mode](#choose-a-usage-mode).
+7. Wait for the import to complete, then review all warnings before enabling flows or publishing the agent.
 
 ### Set your tenant's allowed email domains
 
@@ -38,6 +39,26 @@ Create a development environment first. Do not test imported connection referenc
 - Don't add external or consumer domains. The allowlist is what prevents the digest from being emailed outside your organization.
 - Power Automate won't turn on the flow until the variable has a value. If a subscription has no allowed recipients, the flow skips email for it and records the reason in **Last Delivery Status**.
 - To change the value later, open **Solutions** > **Admin Updates Agent** > **Environment variables** > **Allowed Recipient Domains** and edit **Current value**.
+
+### Choose a usage mode
+
+Any administrator can chat with the agent in either mode. The mode only decides how digests are delivered.
+
+| Mode | Use when | Configure |
+| --- | --- | --- |
+| **Personalized** | Each administrator should choose their own products and destinations. | Nothing at import. Administrators create subscriptions by chatting with the agent. An empty product selection means all products. Assign the **Admin Digest Subscriber** role. |
+| **Shared (all updates)** | Everyone should get all updates, and no one needs to configure anything. | Set the Shared Digest variables below. The flow sends one all-products digest per run. No subscriptions or Subscriber role needed. |
+| **Both** | You want a shared channel plus optional personal digests. | Do both. |
+
+Shared digest environment variables (each defaults to `none`, which disables that channel):
+
+| Variable | Value |
+| --- | --- |
+| **Shared Digest Teams Team ID** (`sample_SharedDigestTeamId`) | Team (Microsoft 365 group) ID of the shared team. Set together with the channel ID. The flow's digest account must be a member of the team. |
+| **Shared Digest Teams Channel ID** (`sample_SharedDigestChannelId`) | Channel ID in that team, for example `19:...@thread.tacv2`. |
+| **Shared Digest Email Recipients** (`sample_SharedDigestRecipients`) | Semicolon-separated addresses, for example an administrators distribution list. Only addresses in **Allowed Recipient Domains** receive it. |
+
+The shared digest uses the same filters, card template, and allowlist as personal digests. Its reporting period is shown in Central Standard Time, the flow's schedule time zone. Its result appears in the flow run history (action `Shared_digest_status`), because there's no subscription row to update. To find team and channel IDs, open the channel in Teams, select **Get link to channel**, and read `groupId` and the channel ID (the part after `/channel/`, URL-decoded) from the link.
 
 Import into a development environment first. Do not enable scheduled delivery against production users until testing is complete.
 
@@ -83,7 +104,7 @@ The solution includes two least-privilege roles for the `Admin Digest Subscripti
 
 | Role | Assign to | Access |
 | --- | --- | --- |
-| Admin Digest Subscriber | Every administrator who uses the agent | Create, read, write, append, and append to **their own** rows (user level). No delete. |
+| Admin Digest Subscriber | Every administrator who uses personal subscriptions | Create, read, write, append, and append to **their own** rows (user level). No delete. Not needed for a shared-only deployment. |
 | Admin Digest Processor | The digest flow's owner account only | Read and write **all** rows (organization level), to select active subscriptions and record delivery status. |
 
 Don't give subscribers organization-level access to the table. The agent's lookup tool has a fixed owner filter, and the Subscriber role is the enforcement boundary that keeps each administrator to their own rows.
@@ -97,7 +118,7 @@ The table must represent at least these values:
 | Value | Logical name | Purpose |
 | --- | --- | --- |
 | Subscription name | `sample_newcolumn` | Human-readable profile name |
-| Selected products | `sample_selectedproducts` | One or more supported product labels, separated by `; ` |
+| Selected products | `sample_selectedproducts` | One or more supported product labels, separated by `; `. Empty means all products. |
 | Teams enabled | `sample_teamsenabled` | Enables Teams delivery |
 | Email enabled | `sample_emailenabled` | Enables email delivery |
 | Team and channel | `sample_teamsteamid`, `sample_teamschannelid`, `sample_teamschannelname` | Teams destination values accepted by the connector |
@@ -119,9 +140,10 @@ On each run, the flow:
 1. Calculates the rolling seven-day window ending at the scheduled run time.
 2. Invokes the agent **once**, with a fixed Microsoft Graph request and a structured output schema. The agent only retrieves posts and writes short impact and action summaries.
 3. Keeps only posts whose category is Plan for change or Prevent or fix issue **and** that are tagged Admin impact. It removes exact duplicates and sorts by group, action date, then last-modified date. This logic is deterministic in the flow, not decided by the model.
-4. For each active subscription, keeps posts whose services match the selected products (case-insensitive), then renders Adaptive Cards from a fixed template. Cards hold at most 10 posts, with text fields truncated, and a compact fallback is posted if a card would exceed 27,000 characters, so every card stays under the Teams 28 KB limit.
+4. For each active subscription, keeps posts whose services match the selected products (case-insensitive; an empty selection means all products), then renders Adaptive Cards from a fixed template. Cards hold at most 10 posts, with text fields truncated, and a compact fallback is posted if a card would exceed 27,000 characters, so every card stays under the Teams 28 KB limit.
 5. Emails only recipients in the allowed domains, posts cards only to the stored team and channel, and writes the outcome to **Last Delivery Status**.
-6. Isolates failures per subscription. If retrieval fails, it sends nothing and records the failure on every active subscription.
+6. When any Shared Digest variable is set, sends one all-products digest to the shared team channel and/or email recipients, using the same rendering and allowlist.
+7. Isolates failures per subscription. If retrieval fails, it sends nothing, personal or shared, and records the failure on every active subscription.
 
 Keep connection identifiers and user destinations in Dataverse or environment-bound connections, not in the behavior files.
 ## 8. Configure and test the agent
@@ -137,6 +159,8 @@ Test at least these scenarios before publishing:
 - Subscription creation, review, update, preview, and disable operations.
 - Teams-only, email-only, and dual-channel digest delivery (run the flow manually in the development environment).
 - A subscription with recipients outside the allowed domains. They must be skipped and counted in Last Delivery Status.
+- A subscription with no products selected. It must receive all qualifying posts.
+- If you use shared mode, a run with the Shared Digest variables set (check `Shared_digest_status` in the run history) and a chat session from an administrator with no subscription.
 - A no-result digest.
 - Connector denial, missing permissions, and partial delivery failure.
 - Attempts to access another user's Dataverse row. The lookup must return only the signed-in user's rows.

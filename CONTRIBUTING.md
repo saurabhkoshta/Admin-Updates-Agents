@@ -21,6 +21,7 @@ Behavior changes should preserve these guarantees:
 - Subscription actions operate only on the authenticated user's Dataverse rows. Keep the fixed owner filter on `Get admin digest subscriptions`.
 - The agent has no delivery tools. Only the `Daily-MC-Trigger` flow sends digests, and it emails only recipients in `Allowed Recipient Domains`.
 - Digest filtering, ordering, and rendering stay deterministic in the flow. The agent retrieves and summarizes posts only.
+- Both usage modes keep working: personalized subscriptions (an empty product selection means all products) and the shared all-products digest configured through the Shared Digest environment variables. Chat never requires a subscription.
 - Delivery success is reported only after the corresponding action succeeds.
 
 ## Validation

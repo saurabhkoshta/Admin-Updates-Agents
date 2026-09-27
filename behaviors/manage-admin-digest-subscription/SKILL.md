@@ -7,6 +7,15 @@ description: Creates, reviews, updates, previews, or disables the signed-in admi
 
 Manage one personal weekly digest profile in the `Admin Digest Subscriptions` Dataverse table in the current Power Platform environment.
 
+## Usage modes
+
+The agent supports two ways to receive digests. Chat works the same in both, and any administrator can ask about any product.
+
+- **Personalized:** the administrator creates a subscription here and chooses products, or leaves products empty to get all products.
+- **Shared:** an administrator configures a shared all-products digest for a Teams channel or email list through the solution's Shared Digest environment variables. No subscription is needed to receive it. You can't see or change those settings. If a user asks, say that the organization may send a shared digest, and that an administrator configures it in the solution's environment variables.
+
+Never require a subscription before answering questions.
+
 ## Tools
 
 - Read: `Get admin digest subscriptions`
@@ -49,7 +58,7 @@ Accept only these exact product choices:
 26. Microsoft Dataverse
 27. Dynamics 365 Apps
 
-Do not offer or store `All products`. Preserve the exact choice labels when writing the row. If the user enters a close but nonexact label, ask them to choose the intended supported value.
+To receive all products, leave the product selection empty; an empty selection means all products. Never store the text `All products`. Otherwise preserve the exact choice labels when writing the row. If the user enters a close but nonexact label, ask them to choose the intended supported value.
 
 ## Subscription fields
 
@@ -58,7 +67,7 @@ Use these `sample_admindigestsubscription` columns. Never write the primary key,
 | Field | Logical name | Value |
 | --- | --- | --- |
 | Subscription name | `sample_newcolumn` | Short profile name |
-| Selected products | `sample_selectedproducts` | Exact supported product labels separated by `; ` |
+| Selected products | `sample_selectedproducts` | Exact supported product labels separated by `; `, or empty for all products |
 | Teams enabled | `sample_teamsenabled` | Yes or No |
 | Team | `sample_teamsteamid` | Team ID accepted by the Teams connector |
 | Channel | `sample_teamschannelid`, `sample_teamschannelname` | Channel ID and display name |
@@ -86,8 +95,8 @@ Use these `sample_admindigestsubscription` columns. Never write the primary key,
 
 ## Create
 
-1. Collect the subscription name, selected products, Teams enabled, email enabled, schedule day, schedule time, and time zone.
-2. Require at least one selected product and one enabled delivery method.
+1. Collect the subscription name, selected products (or all products), Teams enabled, email enabled, schedule day, schedule time, and time zone.
+2. Require one enabled delivery method. Confirm explicitly whether the user wants specific products or all products; never assume all products when the user simply didn't answer.
 3. When Teams is enabled, require the Team and channel identifiers or values expected by the Teams connector.
 4. When email is enabled, require one or more syntactically valid email recipients. Tell the user that only recipients in the organization's own domains receive the digest; others are skipped at delivery. If a recipient is clearly external (for example a consumer mail domain), point that out before saving.
 5. Summarize all values and ask for explicit confirmation before calling `Create my admin digest subscription`.
