@@ -4,7 +4,7 @@ This guide is for administrators installing Admin Updates Agent from an exported
 
 ## 1. Download the solution
 
-Download [AdminUpdatesAgents_1_0_0_0.zip](solution/AdminUpdatesAgents_1_0_0_0.zip). Do not download the repository source ZIP from GitHub's **Code** menu. A source archive is not an importable Power Platform solution.
+Download [AdminUpdatesAgents_1_1_0_0.zip](solution/AdminUpdatesAgents_1_1_0_0.zip) from the `solution/` folder or the [latest release](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest). Do not download the repository source ZIP from GitHub's **Code** menu. A source archive is not an importable Power Platform solution.
 
 The package is an unmanaged solution so administrators can inspect and adapt the reference implementation.
 

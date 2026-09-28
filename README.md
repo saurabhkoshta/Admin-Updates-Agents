@@ -28,7 +28,7 @@ Both modes use the same filters (Plan for change or Prevent or fix issue, tagged
 
 ## Installation
 
-Download [AdminUpdatesAgents_1_0_0_0.zip](solution/AdminUpdatesAgents_1_0_0_0.zip), then import it through **Power Apps > Solutions > Import solution**. During import, bind the required connections and review all environment-specific settings before publishing the agent.
+Download [AdminUpdatesAgents_1_1_0_0.zip](solution/AdminUpdatesAgents_1_1_0_0.zip) from the `solution/` folder or the [latest release](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest), then import it through **Power Apps > Solutions > Import solution**. During import, bind the required connections and review all environment-specific settings before publishing the agent.
 
 > [!IMPORTANT]
 > Set the **Allowed Recipient Domains** environment variable (`sample_AllowedRecipientDomains`) to your own tenant's email domains, for example `contoso.com;contoso.onmicrosoft.com`. The digest flow emails only recipients in these domains, and it can't be turned on until the variable has a value. See [Set your tenant's allowed email domains](SETUP.md#set-your-tenants-allowed-email-domains).
@@ -39,7 +39,9 @@ See [SETUP.md](SETUP.md) for the import and configuration steps.
 
 ## Architecture dashboard
 
-Open [docs/index.html](docs/index.html) in a browser for an interactive overview. It covers the architecture diagram, evidence model, per-scenario walkthroughs, data model, security boundaries, component inventory, deployment checklist, and known gaps. The file is self-contained. To host it, enable GitHub Pages from the `docs/` folder.
+**[View the live architecture dashboard](https://saurabhkoshta.github.io/Admin-Updates-Agents/)** for an interactive overview. It covers the architecture diagram, evidence model, per-scenario walkthroughs, data model, security boundaries, component inventory, deployment checklist, and known gaps.
+
+The dashboard source is [docs/index.html](docs/index.html). GitHub shows HTML files as source code, so use the live link above or open the file locally in a browser. It's served by GitHub Pages from the `docs/` folder on `main`.
 
 ## Evidence model
 
