@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="1200" height="780" role="img" aria-labelledby="archTitle">
+  <title id="archTitle">Runtime architecture: administrators chat with the Admin Updates Agent, which routes to three skills and six tools across evidence and state layers, while the Daily-MC-Trigger flow retrieves posts through the agent once and filters, renders, and delivers digests itself.</title>
+  <style>
+    text { font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; }
+    .flow { fill: none; stroke-width: 2; stroke-dasharray: 6 8; animation: dash 1.4s linear infinite; }
+    .flow.warm { animation-duration: 1s; }
+    @keyframes dash { to { stroke-dashoffset: -28; } }
+    @media (prefers-reduced-motion: reduce) { .flow { animation: none; } }
+  </style>
+  <rect x="0" y="0" width="1200" height="780" rx="20" fill="#0a0f1f"/>
+  <defs>
+    <linearGradient id="gOrch" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2a58"/><stop offset="1" stop-color="#15204a"/></linearGradient>
+    <linearGradient id="gSkill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a2160"/><stop offset="1" stop-color="#1b1a48"/></linearGradient>
+    <linearGradient id="gTool" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f3346"/><stop offset="1" stop-color="#112a44"/></linearGradient>
+    <linearGradient id="gData" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0b3b3a"/><stop offset="1" stop-color="#0d2f45"/></linearGradient>
+    <linearGradient id="gFlow" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3a2a12"/><stop offset="1" stop-color="#2a2016"/></linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#60a5fa"/></marker>
+    <marker id="arrW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
+    <marker id="arrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#34d399"/></marker>
+  </defs>
+
+  <!-- Zone labels -->
+  <rect x="14" y="30" width="232" height="420" rx="18" fill="none" stroke="#60a5fa" stroke-opacity=".45" stroke-dasharray="6 6"/>
+  <text x="130" y="22" text-anchor="middle" fill="#93c5fd" font-size="12" letter-spacing="1.5">ENTRY POINTS</text>
+  <rect x="880" y="440" width="306" height="130" rx="18" fill="none" stroke="#34d399" stroke-opacity=".5" stroke-dasharray="6 6"/>
+  <text x="884" y="587" fill="#6ee7b7" font-size="12" letter-spacing="1.5">ENFORCEMENT BOUNDARY</text>
+  <text x="1033" y="47" text-anchor="middle" fill="#67e8f9" font-size="11" letter-spacing="1.5">EVIDENCE · MCP</text>
+  <text x="1033" y="245" text-anchor="middle" fill="#6ee7b7" font-size="11" letter-spacing="1.5">STATE · DATAVERSE</text>
+
+  <!-- Flows: entry points -> agent -->
+  <path class="flow" stroke="#60a5fa" marker-end="url(#arr)" d="M230,85 C265,85 265,150 298,150"/>
+  <path class="flow" stroke="#60a5fa" marker-end="url(#arr)" d="M230,185 C265,185 265,200 298,200"/>
+  <path class="flow" stroke="#60a5fa" marker-end="url(#arr)" d="M230,285 C265,285 265,250 298,250"/>
+  <path class="flow warm" stroke="#fbbf24" marker-end="url(#arrW)" d="M230,385 C265,385 265,300 298,300"/>
+  <!-- agent -> skills -->
+  <path class="flow" stroke="#a78bfa" marker-end="url(#arr)" d="M540,160 C565,160 565,115 583,115"/>
+  <path class="flow" stroke="#a78bfa" marker-end="url(#arr)" d="M540,230 C565,230 565,235 583,235"/>
+  <path class="flow" stroke="#a78bfa" marker-end="url(#arr)" d="M540,300 C565,300 565,355 583,355"/>
+  <!-- skills -> tool bus -->
+  <path class="flow" stroke="#22d3ee" d="M850,115 L868,115"/>
+  <path class="flow" stroke="#22d3ee" d="M850,235 L868,235"/>
+  <path class="flow" stroke="#22d3ee" d="M850,355 L868,355"/>
+  <path stroke="#22d3ee" stroke-opacity=".5" stroke-width="3" d="M868,81 L868,401"/>
+  <!-- bus -> tools -->
+  <path class="flow" stroke="#22d3ee" marker-end="url(#arr)" d="M868,81 L898,81"/>
+  <path class="flow" stroke="#22d3ee" marker-end="url(#arr)" d="M868,141 L898,141"/>
+  <path class="flow" stroke="#22d3ee" marker-end="url(#arr)" d="M868,201 L898,201"/>
+  <path class="flow" stroke="#22d3ee" marker-end="url(#arr)" d="M868,281 L898,281"/>
+  <path class="flow" stroke="#fbbf24" marker-end="url(#arrW)" d="M868,341 L898,341"/>
+  <path class="flow" stroke="#fbbf24" marker-end="url(#arrW)" d="M868,401 L898,401"/>
+  <!-- state tools -> Dataverse -->
+  <path class="flow" stroke="#34d399" marker-end="url(#arrG)" d="M1033,427 L1033,453"/>
+  <!-- agent -> flow: structured posts -->
+  <path class="flow warm" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arrW)" d="M400,442 L400,636"/>
+  <text x="412" y="520" fill="#fcd34d" font-size="12">Structured posts · agent sends nothing</text>
+  <!-- env vars -> flow -->
+  <path class="flow warm" stroke="#fbbf24" marker-end="url(#arrW)" d="M230,724 L298,724"/>
+  <!-- flow <-> Dataverse -->
+  <path class="flow" stroke="#34d399" marker-start="url(#arrG)" marker-end="url(#arrG)" d="M1110,598 L1110,557"/>
+
+  <!-- ENTRY POINTS -->
+  <g>
+    <rect x="30" y="50" width="200" height="70" rx="12" fill="#152046" stroke="#3b4d8a"/>
+    <text x="50" y="80" fill="#e6ebff" font-size="15" font-weight="600">💬 Admin questions</text>
+    <text x="50" y="102" fill="#93a0c8" font-size="12">Integrated (Entra ID) auth</text>
+  </g>
+  <g>
+    <rect x="30" y="150" width="200" height="70" rx="12" fill="#152046" stroke="#3b4d8a"/>
+    <text x="50" y="180" fill="#e6ebff" font-size="15" font-weight="600">🔔 Subscriptions</text>
+    <text x="50" y="202" fill="#93a0c8" font-size="12">Personalized mode · own row</text>
+  </g>
+  <g>
+    <rect x="30" y="250" width="200" height="70" rx="12" fill="#152046" stroke="#3b4d8a"/>
+    <text x="50" y="280" fill="#e6ebff" font-size="15" font-weight="600">👀 Digest previews</text>
+    <text x="50" y="302" fill="#93a0c8" font-size="12">In chat · nothing is sent</text>
+  </g>
+  <g>
+    <rect x="30" y="350" width="200" height="70" rx="12" fill="#2a2210" stroke="#a07b2b"/>
+    <text x="50" y="380" fill="#e6ebff" font-size="15" font-weight="600">⏰ Weekly schedule</text>
+    <text x="50" y="402" fill="#fcd34d" font-size="12">Daily-MC-Trigger, once per run</text>
+  </g>
+
+  <!-- AGENT -->
+  <g>
+    <rect x="300" y="50" width="240" height="390" rx="16" fill="url(#gOrch)" stroke="#5b6bb5"/>
+    <text x="420" y="80" text-anchor="middle" fill="#e6ebff" font-size="16" font-weight="700">Admin Updates Agent</text>
+    <text x="420" y="100" text-anchor="middle" fill="#93a0c8" font-size="12">Generative orchestration</text>
+  </g>
+  <g>
+    <rect x="320" y="125" width="200" height="56" rx="10" fill="#1f2c60" stroke="#4d5ea8"/>
+    <text x="420" y="150" text-anchor="middle" fill="#e6ebff" font-size="14" font-weight="600">📜 Instructions</text>
+    <text x="420" y="168" text-anchor="middle" fill="#93a0c8" font-size="11">Tool routing · current date</text>
+  </g>
+  <g>
+    <rect x="320" y="200" width="200" height="56" rx="10" fill="#1f2c60" stroke="#4d5ea8"/>
+    <text x="420" y="225" text-anchor="middle" fill="#e6ebff" font-size="14" font-weight="600">🎯 Grounding</text>
+    <text x="420" y="243" text-anchor="middle" fill="#93a0c8" font-size="11">Cite IDs · never merge records</text>
+  </g>
+  <g>
+    <rect x="320" y="275" width="200" height="56" rx="10" fill="#1f2c60" stroke="#4d5ea8"/>
+    <text x="420" y="300" text-anchor="middle" fill="#e6ebff" font-size="14" font-weight="600">🔐 Access control</text>
+    <text x="420" y="318" text-anchor="middle" fill="#93a0c8" font-size="11">Group membership · invoker auth</text>
+  </g>
+  <g>
+    <rect x="320" y="350" width="200" height="70" rx="10" fill="#1a2552" stroke="#3b4d8a" stroke-dasharray="4 4"/>
+    <text x="420" y="378" text-anchor="middle" fill="#e6ebff" font-size="14" font-weight="600">🧠 Model</text>
+    <text x="420" y="398" text-anchor="middle" fill="#93a0c8" font-size="11">Web search disabled</text>
+  </g>
+
+  <!-- SKILLS -->
+  <g>
+    <rect x="585" y="70" width="265" height="90" rx="14" fill="url(#gSkill)" stroke="#7c6bd6"/>
+    <text x="603" y="102" fill="#e6ebff" font-size="14" font-weight="700">🔍 cross-source-investigation</text>
+    <text x="603" y="124" fill="#c4b5fd" font-size="12">Public change → tenant → docs → guidance</text>
+    <text x="603" y="144" fill="#93a0c8" font-size="12">Uses: Enterprise · Release · Learn</text>
+  </g>
+  <g>
+    <rect x="585" y="190" width="265" height="90" rx="14" fill="url(#gSkill)" stroke="#7c6bd6"/>
+    <text x="603" y="222" fill="#e6ebff" font-size="13" font-weight="700">🗂️ manage-admin-digest-subscription</text>
+    <text x="603" y="244" fill="#c4b5fd" font-size="12">Create · review · update · disable</text>
+    <text x="603" y="264" fill="#93a0c8" font-size="12">Uses: Get · Create · Update</text>
+  </g>
+  <g>
+    <rect x="585" y="310" width="265" height="90" rx="14" fill="url(#gSkill)" stroke="#7c6bd6"/>
+    <text x="603" y="342" fill="#e6ebff" font-size="14" font-weight="700">📰 weekly-admin-digest</text>
+    <text x="603" y="364" fill="#c4b5fd" font-size="12">Scheduled data mode · in-chat preview</text>
+    <text x="603" y="384" fill="#93a0c8" font-size="12">Uses: Enterprise (Message Center)</text>
+  </g>
+
+  <!-- TOOLS -->
+  <g>
+    <rect x="900" y="55" width="266" height="52" rx="12" fill="url(#gTool)" stroke="#2b7fa0"/>
+    <text x="918" y="77" fill="#e6ebff" font-size="14" font-weight="600">🏢 MCP Server for Enterprise</text>
+    <text x="918" y="96" fill="#67e8f9" font-size="12">READ · Message Center · health</text>
+  </g>
+  <g>
+    <rect x="900" y="115" width="266" height="52" rx="12" fill="url(#gTool)" stroke="#2b7fa0"/>
+    <text x="918" y="137" fill="#e6ebff" font-size="14" font-weight="600">🗺️ Release Communication</text>
+    <text x="918" y="156" fill="#67e8f9" font-size="12">READ · M365 Roadmap · Azure Updates</text>
+  </g>
+  <g>
+    <rect x="900" y="175" width="266" height="52" rx="12" fill="url(#gTool)" stroke="#2b7fa0"/>
+    <text x="918" y="197" fill="#e6ebff" font-size="14" font-weight="600">📚 Microsoft Learn Docs MCP</text>
+    <text x="918" y="216" fill="#67e8f9" font-size="12">READ · docs · known issues · fixes</text>
+  </g>
+  <g>
+    <rect x="900" y="255" width="266" height="52" rx="12" fill="url(#gTool)" stroke="#2b7fa0"/>
+    <text x="918" y="277" fill="#e6ebff" font-size="14" font-weight="600">🔎 Get subscriptions</text>
+    <text x="918" y="296" fill="#67e8f9" font-size="12">READ · fixed owner filter</text>
+  </g>
+  <g>
+    <rect x="900" y="315" width="266" height="52" rx="12" fill="url(#gTool)" stroke="#a07b2b"/>
+    <text x="918" y="337" fill="#e6ebff" font-size="14" font-weight="600">➕ Create my subscription</text>
+    <text x="918" y="356" fill="#fcd34d" font-size="12">WRITE · after explicit confirmation</text>
+  </g>
+  <g>
+    <rect x="900" y="375" width="266" height="52" rx="12" fill="url(#gTool)" stroke="#a07b2b"/>
+    <text x="918" y="397" fill="#e6ebff" font-size="14" font-weight="600">✏️ Update my subscription</text>
+    <text x="918" y="416" fill="#fcd34d" font-size="12">WRITE · caller's own row only</text>
+  </g>
+
+  <!-- DATAVERSE -->
+  <g>
+    <rect x="900" y="455" width="266" height="100" rx="14" fill="url(#gData)" stroke="#2f9e87"/>
+    <text x="918" y="483" fill="#e6ebff" font-size="15" font-weight="700">🗄️ Microsoft Dataverse</text>
+    <text x="918" y="503" fill="#6ee7b7" font-size="12">Admin Digest Subscriptions (user-owned)</text>
+    <text x="918" y="522" fill="#93a0c8" font-size="12">Subscriber role: own rows only</text>
+    <text x="918" y="540" fill="#93a0c8" font-size="12">Processor role: flow account only</text>
+  </g>
+
+  <!-- ENVIRONMENT VARIABLES -->
+  <g>
+    <rect x="30" y="600" width="200" height="160" rx="14" fill="#2a2210" stroke="#a07b2b"/>
+    <text x="48" y="628" fill="#e6ebff" font-size="15" font-weight="700">⚙️ Environment variables</text>
+    <text x="48" y="654" fill="#fcd34d" font-size="12">Allowed Recipient Domains</text>
+    <text x="48" y="671" fill="#93a0c8" font-size="11">Your tenant's domains (required)</text>
+    <text x="48" y="697" fill="#fcd34d" font-size="12">Shared Digest Team · Channel</text>
+    <text x="48" y="714" fill="#fcd34d" font-size="12">Shared Digest Recipients</text>
+    <text x="48" y="731" fill="#93a0c8" font-size="11">Default none · enables shared mode</text>
+  </g>
+
+  <!-- DAILY-MC-TRIGGER PIPELINE -->
+  <g>
+    <rect x="300" y="600" width="866" height="160" rx="16" fill="url(#gFlow)" stroke="#b7791f"/>
+    <text x="733" y="626" text-anchor="middle" fill="#fef3c7" font-size="16" font-weight="700">⏰ Daily-MC-Trigger · deterministic delivery pipeline</text>
+  </g>
+  <g font-size="13" font-weight="600" fill="#fef3c7" text-anchor="middle">
+    <rect x="320" y="638" width="102" height="50" rx="10" fill="#33260f" stroke="#8a6420"/>
+    <text x="371" y="659">Retrieve</text>
+    <rect x="440" y="638" width="102" height="50" rx="10" fill="#33260f" stroke="#8a6420"/>
+    <text x="491" y="659">Filter</text>
+    <rect x="560" y="638" width="102" height="50" rx="10" fill="#33260f" stroke="#8a6420"/>
+    <text x="611" y="659">Order</text>
+    <rect x="680" y="638" width="102" height="50" rx="10" fill="#33260f" stroke="#8a6420"/>
+    <text x="731" y="659">Match</text>
+    <rect x="800" y="638" width="102" height="50" rx="10" fill="#33260f" stroke="#8a6420"/>
+    <text x="851" y="659">Render</text>
+    <rect x="920" y="638" width="102" height="50" rx="10" fill="#33260f" stroke="#8a6420"/>
+    <text x="971" y="659">Deliver</text>
+    <rect x="1040" y="638" width="102" height="50" rx="10" fill="#33260f" stroke="#8a6420"/>
+    <text x="1091" y="659">Record</text>
+  </g>
+  <g font-size="11" fill="#fcd34d" text-anchor="middle">
+    <text x="371" y="677">agent · once</text>
+    <text x="491" y="677">Admin impact</text>
+    <text x="611" y="677">group · date</text>
+    <text x="731" y="677">empty = all</text>
+    <text x="851" y="677">card &lt; 28 KB</text>
+    <text x="971" y="677">Teams · email</text>
+    <text x="1091" y="677">status → rows</text>
+  </g>
+  <g>
+    <path class="flow warm" stroke="#fbbf24" marker-end="url(#arrW)" d="M424,663 L438,663"/>
+    <path class="flow warm" stroke="#fbbf24" marker-end="url(#arrW)" d="M544,663 L558,663"/>
+    <path class="flow warm" stroke="#fbbf24" marker-end="url(#arrW)" d="M664,663 L678,663"/>
+    <path class="flow warm" stroke="#fbbf24" marker-end="url(#arrW)" d="M784,663 L798,663"/>
+    <path class="flow warm" stroke="#fbbf24" marker-end="url(#arrW)" d="M904,663 L918,663"/>
+    <path class="flow warm" stroke="#fbbf24" marker-end="url(#arrW)" d="M1024,663 L1038,663"/>
+  </g>
+  <g>
+    <rect x="320" y="700" width="196" height="48" rx="10" fill="#1f2c60" stroke="#4d5ea8"/>
+    <text x="336" y="720" fill="#e6ebff" font-size="13" font-weight="600">👤 Personalized mode</text>
+    <text x="336" y="738" fill="#93a0c8" font-size="11">One digest per active subscription</text>
+  </g>
+  <g>
+    <rect x="530" y="700" width="196" height="48" rx="10" fill="#1f2c60" stroke="#4d5ea8"/>
+    <text x="546" y="720" fill="#e6ebff" font-size="13" font-weight="600">👥 Shared mode</text>
+    <text x="546" y="738" fill="#93a0c8" font-size="11">All products · from env vars</text>
+  </g>
+  <g>
+    <rect x="740" y="700" width="196" height="48" rx="10" fill="url(#gData)" stroke="#2f9e87"/>
+    <text x="756" y="720" fill="#e6ebff" font-size="13" font-weight="600">💬 Microsoft Teams</text>
+    <text x="756" y="738" fill="#6ee7b7" font-size="11">Stored team and channel only</text>
+  </g>
+  <g>
+    <rect x="950" y="700" width="196" height="48" rx="10" fill="url(#gData)" stroke="#2f9e87"/>
+    <text x="966" y="720" fill="#e6ebff" font-size="13" font-weight="600">✉️ Outlook email</text>
+    <text x="966" y="738" fill="#6ee7b7" font-size="11">Allowed tenant domains only</text>
+  </g>
+</svg>
