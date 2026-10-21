@@ -194,8 +194,8 @@
           <h1>Three sources.<br>One admin conversation.</h1>
           <p class="lead">Understand Microsoft 365 and Azure changes without configuring a subscription database or a scheduled digest. Ask, investigate, and get a source-attributed answer in chat.</p>
           <div class="actions">
-            <a class="cta" href="../solution/AdminUpdatesAgents_1_2_0_0.zip">Download solution</a>
-            <a class="cta secondary" href="../SETUP.md">Read setup guide</a>
+            <a class="cta" href="https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest/download/AdminUpdatesAgents_1_2_0_0.zip">Download solution</a>
+                        <a class="cta secondary" href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/SETUP.md">Read setup guide</a>
           </div>
           <p class="small muted">Community reference implementation. Not developed, endorsed, or supported by Microsoft.</p>
         </div>
@@ -300,24 +300,24 @@
         <table>
           <thead><tr><th scope="col">Component</th><th scope="col">Purpose</th><th scope="col">Source</th></tr></thead>
           <tbody id="inventoryRows">
-            <tr><td>Admin Updates Agent</td><td>Authentication, routing, grounding, and response instructions</td><td><a href="../settings.mcs.yml">Agent settings</a></td></tr>
-            <tr><td>cross-source-investigation</td><td>Evidence correlation and current-status checks</td><td><a href="../behaviors/cross-source-investigation/SKILL.md">Behavior</a></td></tr>
-            <tr><td>MCP Server for Enterprise</td><td>Message Center and Service Health</td><td><a href="../capabilities/tools/MCP-Server-for-Enterprise_PPB.mcs.yml">Tool binding</a></td></tr>
-            <tr><td>Release Communication Server</td><td>Microsoft 365 Roadmap and Azure Updates</td><td><a href="../capabilities/tools/ReleaseCommunicationServer_QAL.mcs.yml">Tool binding</a></td></tr>
-            <tr><td>Microsoft Learn Docs MCP Server</td><td>Official documentation and guidance</td><td><a href="../capabilities/tools/MicrosoftLearnDocsMCP-MicrosoftLearnDocsMCPServer_l9i.mcs.yml">Tool binding</a></td></tr>
-            <tr><td>Two custom connectors</td><td>Sanitized Enterprise and Release connector definitions</td><td><a href="../connectors/">Connectors</a></td></tr>
-            <tr><td>Three connection references</td><td>Bind the evidence sources in your environment</td><td><a href="../infrastructure/connections/">Connection mappings</a></td></tr>
-            <tr><td>Unmanaged chat-only solution</td><td>Agent, behavior, MCP bindings, and connectors. No custom table, flow, digest roles, or environment variables.</td><td><a href="../solution/AdminUpdatesAgents_1_2_0_0.zip">Importable ZIP</a></td></tr>
+            <tr><td>Admin Updates Agent</td><td>Authentication, routing, grounding, and response instructions</td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/settings.mcs.yml">Agent settings</a></td></tr>
+            <tr><td>cross-source-investigation</td><td>Evidence correlation and current-status checks</td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/behaviors/cross-source-investigation/SKILL.md">Behavior</a></td></tr>
+            <tr><td>MCP Server for Enterprise</td><td>Message Center and Service Health</td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/capabilities/tools/MCP-Server-for-Enterprise_PPB.mcs.yml">Tool binding</a></td></tr>
+            <tr><td>Release Communication Server</td><td>Microsoft 365 Roadmap and Azure Updates</td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/capabilities/tools/ReleaseCommunicationMCP_6bY.mcs.yml">Tool binding</a></td></tr>
+            <tr><td>Microsoft Learn Docs MCP Server</td><td>Official documentation and guidance</td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/capabilities/tools/MicrosoftLearnDocsMCP-MicrosoftLearnDocsMCPServer_mZQ.mcs.yml">Tool binding</a></td></tr>
+            <tr><td>Two custom connectors</td><td>Sanitized Enterprise and Release connector definitions</td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/tree/main/connectors">Connectors</a></td></tr>
+            <tr><td>Three connection references</td><td>Bind the evidence sources in your environment</td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/tree/main/infrastructure/connections">Connection mappings</a></td></tr>
+            <tr><td>Unmanaged chat-only solution</td><td>Agent, behavior, MCP bindings, and connectors. No custom table, flow, digest roles, or environment variables.</td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest/download/AdminUpdatesAgents_1_2_0_0.zip">Importable ZIP</a></td></tr>
           </tbody>
         </table>
       </div>
-      <p class="small muted">Filename and solution version remain 1.2.0.0. Use the current branch's <a href="../solution/SHA256SUMS.txt">checksum</a> to identify this build rather than an older Release asset.</p>
+      <p class="small muted">Filename and solution version are 1.2.0.0. Verify the download against the <a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest/download/SHA256SUMS.txt">checksum</a>. Earlier releases are archived and contain the older digest-enabled package.</p>
     </section>
 
     <section id="setup">
       <p class="eyebrow">04 / setup</p>
       <h2>Import, connect, test.</h2>
-      <p class="muted">The three MCP integrations still need access and authorization. There is no subscription data model or delivery pipeline to configure. Full steps are in <a href="../SETUP.md">SETUP.md</a>.</p>
+      <p class="muted">The three MCP integrations still need access and authorization. There is no subscription data model or delivery pipeline to configure. Full steps are in <a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/SETUP.md">SETUP.md</a>.</p>
       <div class="panel">
         <p id="checklistStatus" class="small" role="status">0 of 5 steps checked</p>
         <div id="progress" class="progress" role="progressbar" aria-label="Setup checklist" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><div id="progressFill"></div></div>
@@ -337,14 +337,14 @@
       <h2>What this simplification does and does not change.</h2>
       <details open><summary>Shared connections require restricted agent access</summary><p>The agent requires Microsoft sign-in and uses centrally managed Agent author authentication for all three MCP tools. Approved administrators can chat without Copilot Studio editing access or individual tool connections. They share the Enterprise service account's data access, not their individual tenant permissions. Restrict use to an approved administrator security group, keep credentials in an approved vault, and retain MFA and Conditional Access. Review actual connector and MCP permissions; research-only instructions do not reduce an overly broad permission grant.</p></details>
       <details><summary>No custom subscription table is not the same as no Dataverse platform dependency</summary><p>The subscription data model is removed. Copilot Studio and its Power Platform environment still have their normal licensing and platform requirements.</p></details>
-      <details><summary>An old unmanaged installation is not automatically cleaned up</summary><p>Importing a smaller unmanaged package does not remove components already installed by the old digest solution. Turn off old scheduled flows, back up data, and review dependencies before removing old tables, roles, environment variables, or unused connections. See <a href="../SETUP.md#existing-digest-enabled-installations">the migration guidance</a>.</p></details>
+      <details><summary>An old unmanaged installation is not automatically cleaned up</summary><p>Importing a smaller unmanaged package does not remove components already installed by the old digest solution. Turn off old scheduled flows, back up data, and review dependencies before removing old tables, roles, environment variables, or unused connections. See <a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/SETUP.md#existing-digest-enabled-installations">the migration guidance</a>.</p></details>
       <details><summary>Briefings are evidence-based, not a guarantee of exhaustive coverage</summary><p>The agent can only use the records the sources return. Responses should state the reporting period, unavailable sources, and retrieval limitations. Public roadmap information alone never establishes tenant impact.</p></details>
       <details><summary>Viewing this HTML on GitHub</summary><p>GitHub's repository file view shows source code. Download and open this file locally to use the dashboard. Hosting it with GitHub Pages is a separate configuration step.</p></details>
     </section>
   </main>
   <footer>
     <div class="wrap">
-      <p><a href="../README.md">Repository overview</a><a href="../SETUP.md">Setup guide</a><a href="../SECURITY.md">Security</a><a href="../LICENSE">MIT license</a></p>
+      <p><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents">Repository overview</a><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/SETUP.md">Setup guide</a><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/SECURITY.md">Security</a><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/LICENSE">MIT license</a></p>
       <p>Admin Updates Agent. Independent community reference implementation. No external scripts, stylesheets, or data requests are required to render this page.</p>
     </div>
   </footer>

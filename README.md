@@ -70,9 +70,9 @@ Public information alone does not prove tenant impact. Source IDs, dates, status
 
 ### HTML architecture view
 
-Open [docs/index.html](docs/index.html) in a browser for the architecture, example requests, source roles, component inventory, and setup checklist.
+**[View the live architecture dashboard](https://saurabhkoshta.github.io/Admin-Updates-Agents/)** for the architecture, example requests, source roles, component inventory, and setup checklist.
 
-GitHub's file browser shows HTML source, not the rendered dashboard. Download the file and open it locally, or configure GitHub Pages separately to host it.
+The dashboard source is [docs/index.html](docs/index.html). GitHub's file browser shows HTML as source code, so use the live link above. It is served by GitHub Pages from the `docs/` folder on `main`.
 
 ## Repository layout
 
