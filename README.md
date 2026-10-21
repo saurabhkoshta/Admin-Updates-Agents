@@ -35,7 +35,7 @@ See [evaluation setup](SETUP.md#evaluate-natural-language-routing) for import in
 
 ## Install
 
-1. Download [AdminUpdatesAgents_1_2_0_0.zip](solution/AdminUpdatesAgents_1_2_0_0.zip) and verify [SHA256SUMS.txt](solution/SHA256SUMS.txt).
+1. Download [AdminUpdatesAgents_1_2_0_0.zip](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest/download/AdminUpdatesAgents_1_2_0_0.zip) from the [latest release](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest) and verify it against [SHA256SUMS.txt](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest/download/SHA256SUMS.txt).
 2. Import it through **Power Apps > Solutions > Import solution**.
 3. Configure the three centrally managed evidence-source connections, select an available model, and test.
 4. Publish and share the agent only with the approved administrator security group when ready.
@@ -44,7 +44,7 @@ See [SETUP.md](SETUP.md) for the connection and permission steps, including guid
 
 Copilot Studio and its Power Platform environment still have their normal platform and licensing requirements. Removing the custom subscription table does not remove any Dataverse requirement imposed by the platform.
 
-The archive is an unmanaged solution. The filename and solution version remain `1.2.0.0`; verify the checksum to identify this chat-only build. A historical GitHub Release may still contain an older archive. Use the package linked above from the current branch.
+The archive is an unmanaged solution. The filename and solution version are `1.2.0.0`; verify the checksum to identify this chat-only build. Earlier releases (v1.0.0 and v1.1.0) are archived and contain the older digest-enabled package. Do not use them. The same package and checksum are also in the [solution/](solution) folder of this repository.
 
 ## Architecture
 

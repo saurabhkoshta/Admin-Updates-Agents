@@ -15,15 +15,15 @@ The platform's normal environment and Dataverse prerequisites still apply. You d
 
 ## 2. Download and import
 
-Download [AdminUpdatesAgents_1_2_0_0.zip](solution/AdminUpdatesAgents_1_2_0_0.zip), not GitHub's source ZIP.
+Download [AdminUpdatesAgents_1_2_0_0.zip](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest/download/AdminUpdatesAgents_1_2_0_0.zip) from the [latest release](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest), not GitHub's source ZIP.
 
-Check the archive against [SHA256SUMS.txt](solution/SHA256SUMS.txt):
+Check the archive against [SHA256SUMS.txt](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest/download/SHA256SUMS.txt):
 
 ```powershell
 Get-FileHash .\AdminUpdatesAgents_1_2_0_0.zip -Algorithm SHA256
 ```
 
-The filename and solution version remain `1.2.0.0`. Use the current branch's package and checksum together; a historical Release download can contain the older digest-enabled package.
+The filename and solution version are `1.2.0.0`. Earlier releases (v1.0.0 and v1.1.0) are archived and contain the older digest-enabled package. Do not use them.
 
 In [Power Apps](https://make.powerapps.com/):
 
