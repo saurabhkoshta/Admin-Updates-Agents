@@ -1,124 +1,102 @@
 # Admin Updates Agent
 
-<img src="icon.png" alt="Admin Updates Agent icon" width="220">
+<img src="icon.png" alt="Admin Updates Agent icon" width="180">
 
-Admin Updates Agent is a Copilot Studio reference agent for Microsoft 365 and Azure administrators. It correlates tenant communications, public release information, and Microsoft Learn documentation, then turns the evidence into concise operational guidance.
+A **chat-only Copilot Studio agent** for Microsoft 365 and Azure administrators. Ask about a specific product, request updates across all products, or investigate a change using tenant communications, public release information, and Microsoft Learn.
 
 This is an independent community reference implementation. It is not developed, endorsed, or supported by Microsoft.
 
-## Capabilities
+## What it does
 
-- Search tenant-specific Message Center posts and Service Health incidents or advisories.
+- Search tenant Message Center posts and Service Health incidents or advisories.
 - Search public Microsoft 365 Roadmap items and Azure Updates.
-- Enrich findings with official Microsoft Learn documentation.
-- Investigate the relationship between a public change, tenant impact, known issues, and administrator actions.
-- Manage per-user weekly digest preferences in Dataverse, and preview a digest in chat.
-- Deliver filtered weekly digests through Microsoft Teams and email from a scheduled flow. Filtering, rendering, and delivery are deterministic, and email goes only to your tenant's allowed domains.
+- Find official Microsoft Learn documentation, limitations, and remediation guidance.
+- Correlate public changes with tenant evidence without confusing their authority.
+- Produce an on-demand briefing in chat for the products and time range you ask for.
 
-## Usage modes
+**No subscriptions or scheduled delivery.** There is no custom subscription table, digest flow, digest security role, delivery account, or email-domain configuration. The agent does not send email or post Teams cards. Using Teams as a chat channel is separate from automated Teams delivery.
 
-The same solution supports two ways of working, separately or together. In both, every administrator can chat with the agent about any product, with or without a subscription.
+Product choices apply to the conversation. They are not saved as subscription preferences across conversations. No product selection is required before chatting.
 
-| Mode | Who configures it | What administrators get |
-| --- | --- | --- |
-| **Personalized** | Each administrator, by chatting with the agent | A personal subscription row with chosen products (or all products, by leaving the selection empty), Teams channel and/or email recipients, and time zone. |
-| **Shared (all updates)** | One administrator, once, in environment variables | One all-products digest per run to a shared Teams channel and/or email list, for example an "M365 Admins" channel. No per-admin setup and no subscription needed. |
+## Examples
 
-Both modes use the same filters (Plan for change or Prevent or fix issue, tagged Admin impact), card template, 28 KB card limit, and tenant-domain email allowlist. Leave the Shared Digest variables as `none` for a personalized-only deployment. Skip subscriptions (and the Subscriber role) for a shared-only deployment. See [Choose a usage mode](SETUP.md#choose-a-usage-mode).
+- "What changed for Microsoft Teams in the last seven days?"
+- "Show admin-impact updates across all products this week."
+- "Is this roadmap feature rolling out to our tenant?"
+- "Find the documented prerequisites and known issues for this change."
 
-## Installation
+An all-products request means no product filter, not a guarantee that a source returned every record. The agent should state its date range, source coverage, and any limitations.
 
-Download [AdminUpdatesAgents_1_1_0_0.zip](solution/AdminUpdatesAgents_1_1_0_0.zip) from the `solution/` folder or the [latest release](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest), then import it through **Power Apps > Solutions > Import solution**. During import, bind the required connections and review all environment-specific settings before publishing the agent.
+## Routing evaluations
 
-> [!IMPORTANT]
-> Set the **Allowed Recipient Domains** environment variable (`sample_AllowedRecipientDomains`) to your own tenant's email domains, for example `contoso.com;contoso.onmicrosoft.com`. The digest flow emails only recipients in these domains, and it can't be turned on until the variable has a value. See [Set your tenant's allowed email domains](SETUP.md#set-your-tenants-allowed-email-domains).
+Use the [25 natural-language test cases](evals/routing-test-set.csv) to check that ordinary admin questions reach the right sources without naming a server. The [capability expectations](evals/routing-expectations.csv) cover single-source lookups, combined investigations, past-dated roadmap verification, clarification and chat-only boundaries.
 
-Do not use the source archive generated by GitHub's **Code** menu. Only the ZIP under `solution/` is an importable Power Platform solution.
+See [evaluation setup](SETUP.md#evaluate-natural-language-routing) for import instructions and actual tool-trace checks. Response quality alone does not prove correct tool routing.
 
-See [SETUP.md](SETUP.md) for the import and configuration steps.
+## Install
+
+1. Download [AdminUpdatesAgents_1_2_0_0.zip](solution/AdminUpdatesAgents_1_2_0_0.zip) and verify [SHA256SUMS.txt](solution/SHA256SUMS.txt).
+2. Import it through **Power Apps > Solutions > Import solution**.
+3. Configure the three centrally managed evidence-source connections, select an available model, and test.
+4. Publish and share the agent only with the approved administrator security group when ready.
+
+See [SETUP.md](SETUP.md) for the connection and permission steps, including guidance for an existing installation.
+
+Copilot Studio and its Power Platform environment still have their normal platform and licensing requirements. Removing the custom subscription table does not remove any Dataverse requirement imposed by the platform.
+
+The archive is an unmanaged solution. The filename and solution version remain `1.2.0.0`; verify the checksum to identify this chat-only build. A historical GitHub Release may still contain an older archive. Use the package linked above from the current branch.
 
 ## Architecture
 
-![Runtime architecture](docs/images/architecture.svg)
-
-## Architecture dashboard
-
-**[View the live architecture dashboard](https://saurabhkoshta.github.io/Admin-Updates-Agents/)** for an interactive overview. It covers the architecture diagram, evidence model, per-scenario walkthroughs, data model, security boundaries, component inventory, deployment checklist, and known gaps.
-
-The dashboard source is [docs/index.html](docs/index.html). GitHub shows HTML files as source code, so use the live link above or open the file locally in a browser. It's served by GitHub Pages from the `docs/` folder on `main`.
-
-## Evidence model
-
 ```mermaid
 flowchart LR
-    User[Administrator] --> Agent[Admin Updates Agent]
-    Flow[Daily-MC-Trigger weekly flow] -->|retrieve posts| Agent
+    User[Administrator in chat] --> Agent[Admin Updates Agent]
     Agent --> Enterprise[MCP Server for Enterprise]
     Agent --> Release[Release Communication Server]
     Agent --> Learn[Microsoft Learn Docs MCP Server]
-    Agent -->|own rows only| Dataverse[Dataverse subscriptions]
-    Flow -->|all active rows| Dataverse
-    Flow -->|personal + shared Adaptive Cards| Teams[Microsoft Teams]
-    Flow -->|personal + shared, allowed domains only| Email[Microsoft 365 Outlook email]
-
-    Enterprise --> Tenant[Tenant communications and service health]
-    Release --> Public[Roadmap and Azure updates]
-    Learn --> Docs[Official documentation and remediation]
+    Enterprise --> Tenant[Message Center and Service Health]
+    Release --> Public[Microsoft 365 Roadmap and Azure Updates]
+    Learn --> Docs[Official documentation]
+    Agent --> Answer[Source-attributed answer in chat]
 ```
 
-Each source has a distinct authority:
-
-| Source | Used for |
+| Source | Evidence role |
 | --- | --- |
-| MCP Server for Enterprise | Tenant Message Center posts and Service Health records |
-| Release Communication Server | Public Microsoft 365 Roadmap items and Azure Updates |
-| Microsoft Learn Docs MCP Server | Product behavior, prerequisites, limitations, known issues, and remediation |
+| MCP Server for Enterprise | Tenant communications and service health |
+| Release Communication Server | Public releases and roadmap timing |
+| Microsoft Learn Docs MCP Server | Documented behavior, prerequisites, known issues, and procedures |
 
-The agent preserves source-specific IDs, dates, status, scope, and links. It does not infer tenant impact from public information alone.
+Public information alone does not prove tenant impact. Source IDs, dates, status, links, and conflicts stay visible.
+
+### HTML architecture view
+
+Open [docs/index.html](docs/index.html) in a browser for the architecture, example requests, source roles, component inventory, and setup checklist.
+
+GitHub's file browser shows HTML source, not the rendered dashboard. Download the file and open it locally, or configure GitHub Pages separately to host it.
 
 ## Repository layout
 
 | Path | Contents |
 | --- | --- |
-| `settings.mcs.yml` | Agent identity, model configuration, authentication mode, and core instructions |
-| `behaviors/` | Reusable investigation, subscription management, and weekly digest skills |
-| `capabilities/tools/` | Copilot Studio tool bindings |
-| `connectors/` | Exported custom connector definitions |
-| `infrastructure/connections/` | Exported connection reference mappings |
+| `settings.mcs.yml` | Agent identity, authentication, model, and instructions |
+| `behaviors/cross-source-investigation/` | Cross-source investigation behavior |
+| `capabilities/tools/` | Three MCP tool bindings |
+| `connectors/` | Sanitized custom connector definitions |
+| `infrastructure/connections/` | Three agent connection reference mappings |
 | `settings/` | Additional Copilot Studio settings |
-| `docs/` | Self-contained HTML architecture dashboard and SVG architecture diagram |
-| `solution/` | Sanitized, importable Power Platform solution and checksum |
+| `docs/` | HTML architecture dashboard |
+| `evals/` | Natural-language routing evaluation CSV, capability expectations and local validation |
+| `solution/` | Importable chat-only solution and checksum |
 
-## Prerequisites
+## Security and contributions
 
-- A Power Platform environment with Copilot Studio authoring access.
-- Access to the MCP Server for Enterprise, Release Communication Server, and Microsoft Learn Docs MCP Server.
-- Microsoft Teams and Microsoft 365 Outlook connections, owned by the digest flow's account, for enabled delivery methods.
-- Dataverse and the user-owned `Admin Digest Subscriptions` table, with the included **Admin Digest Subscriber** and **Admin Digest Processor** security roles.
+The agent requires Microsoft sign-in and uses centrally managed **Agent author authentication** (`Maker`) for its three MCP tools. A maintainer configures the connections once. Administrators who chat with the agent do not need Copilot Studio editing access or individual tool connections.
 
-See [SETUP.md](SETUP.md) for environment preparation and connection rebinding.
+Enterprise MCP uses a dedicated service account with delegated access to the target tenant's Message Center and Service Health. An app registration identifies the connector but does not replace that user sign-in. Agent users share the connection's data access, not their individual tenant permissions. Restrict agent access to an approved administrator security group and review membership.
 
-## Important portability notes
+Deployers must use their own tenant's domain and tenant-specific connector configuration. No service-account credentials or live connections are included in the package. See [SETUP.md](SETUP.md#3-configure-the-three-evidence-sources) for setup, permission requirements, and connection maintenance.
 
-The package under `solution/` includes the agent, the `Admin Digest Subscriptions` table, the `Daily-MC-Trigger` flow, two security roles, the `Allowed Recipient Domains` environment variable (with no value), three optional `Shared Digest` environment variables (default `none`), custom connectors, and connection references. It uses the generic `sample` publisher prefix and does not contain source-tenant IDs, tenant domains, user identities, environment URLs, connection instances, or signed asset URLs.
-
-The MCP Server for Enterprise connector intentionally contains placeholders for the target tenant ID and federated identity subject. Configure these values for your tenant before creating its connection. The imported connections must also be bound to identities in the target environment.
-
-The remaining repository files are source material for review and contribution. Local `.mcs` connection state, authentication tokens, and environment binding files are intentionally excluded.
-
-## Security
-
-The agent uses integrated authentication, group-based access control, invoker connections, and Dataverse ownership as part of its authorization model:
-
-- **Owner-scoped subscriptions.** The agent's subscription lookup uses a fixed filter on the signed-in user's Entra object ID; the model can't change it. The Admin Digest Subscriber role limits users to their own rows at the Dataverse level.
-- **No model-driven delivery.** The agent has no email or Teams tool. Only the scheduled flow delivers digests.
-- **Tenant-only email.** The flow sends email only to recipients in the `Allowed Recipient Domains` environment variable, which you set to your tenant's domains.
-
-Review [SECURITY.md](SECURITY.md) before deploying or reporting a vulnerability.
-
-## Contributing
-
-Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+Read [SECURITY.md](SECURITY.md) before deployment and [CONTRIBUTING.md](CONTRIBUTING.md) before making changes.
 
 ## License
 

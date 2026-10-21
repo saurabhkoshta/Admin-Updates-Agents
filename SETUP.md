@@ -1,170 +1,159 @@
 # Setup Guide
 
-This guide is for administrators installing Admin Updates Agent from an exported Power Platform solution. Copilot Studio and connector behavior can vary by environment, licensing, and feature availability.
+This package installs the **chat-only Admin Updates Agent**. Its only functional integrations are the three MCP evidence sources. It does not include personal subscriptions or automated digest delivery.
 
-## 1. Download the solution
+## 1. Prepare an environment
 
-Download [AdminUpdatesAgents_1_1_0_0.zip](solution/AdminUpdatesAgents_1_1_0_0.zip) from the `solution/` folder or the [latest release](https://github.com/saurabhkoshta/Admin-Updates-Agents/releases/latest). Do not download the repository source ZIP from GitHub's **Code** menu. A source archive is not an importable Power Platform solution.
+Use a development Power Platform environment with:
 
-The package is an unmanaged solution so administrators can inspect and adapt the reference implementation.
+- Copilot Studio access and the required licensing.
+- Permission to import the solution and configure custom connectors and connections.
+- Access to the MCP Server for Enterprise, Release Communication Server, and Microsoft Learn Docs MCP Server.
+- Appropriate Microsoft 365 permissions for tenant Message Center and Service Health data.
 
-## 2. Prepare the environment
+The platform's normal environment and Dataverse prerequisites still apply. You do **not** need a custom subscription table, digest security roles, a delivery service account, an Outlook connection, or a Teams delivery connection.
 
-You need:
+## 2. Download and import
 
-- A Power Platform environment.
-- Permission to create or update Copilot Studio agents, connections, connection references, and cloud flows.
-- Access to each MCP server used by the agent.
-- Dataverse permissions to import or bind the subscription table and configure its security roles.
+Download [AdminUpdatesAgents_1_2_0_0.zip](solution/AdminUpdatesAgents_1_2_0_0.zip), not GitHub's source ZIP.
 
-Create a development environment first. Do not test imported connection references or scheduled delivery against production users.
+Check the archive against [SHA256SUMS.txt](solution/SHA256SUMS.txt):
 
-## 3. Import the solution
+```powershell
+Get-FileHash .\AdminUpdatesAgents_1_2_0_0.zip -Algorithm SHA256
+```
 
-1. Open [Power Apps](https://make.powerapps.com/) and select the target environment.
-2. Open **Solutions**, select **Import solution**, and upload the release ZIP.
-3. Review the solution details and proceed through the import wizard.
-4. Select or create each required connection when prompted.
-5. When the wizard shows the **Allowed Recipient Domains** environment variable, enter your tenant's email domains. See [Set your tenant's allowed email domains](#set-your-tenants-allowed-email-domains) below.
-6. If you want the shared all-updates digest, set the **Shared Digest** environment variables. Otherwise leave them as `none`. See [Choose a usage mode](#choose-a-usage-mode).
-7. Wait for the import to complete, then review all warnings before enabling flows or publishing the agent.
+The filename and solution version remain `1.2.0.0`. Use the current branch's package and checksum together; a historical Release download can contain the older digest-enabled package.
 
-### Set your tenant's allowed email domains
+In [Power Apps](https://make.powerapps.com/):
 
-> [!IMPORTANT]
-> The digest flow emails only recipients whose address domain is listed in the `sample_AllowedRecipientDomains` (**Allowed Recipient Domains**) environment variable. The package ships without a value. Set it to **your own tenant's domains** before you turn on the flow.
+1. Select the target development environment.
+2. Open **Solutions > Import solution** and upload the ZIP.
+3. Review the solution details and connection references.
+4. Complete the import and inspect any warnings.
 
-- Use a semicolon-separated list of your tenant's verified domains, for example `contoso.com;contoso.onmicrosoft.com`. You can find them in the Microsoft 365 admin center under **Settings** > **Domains**, or in the Microsoft Entra admin center under **Custom domain names**.
-- Matching is exact and case-insensitive. Subdomains aren't included automatically, so list each subdomain you use (for example `eu.contoso.com`).
-- Don't add external or consumer domains. The allowlist is what prevents the digest from being emailed outside your organization.
-- Power Automate won't turn on the flow until the variable has a value. If a subscription has no allowed recipients, the flow skips email for it and records the reason in **Last Delivery Status**.
-- To change the value later, open **Solutions** > **Admin Updates Agent** > **Environment variables** > **Allowed Recipient Domains** and edit **Current value**.
+There are no digest environment variables to fill in and no scheduled flow to enable.
 
-### Choose a usage mode
+## 3. Configure the three evidence sources
 
-Any administrator can chat with the agent in either mode. The mode only decides how digests are delivered.
-
-| Mode | Use when | Configure |
+| Connection | Purpose | Authorization to review |
 | --- | --- | --- |
-| **Personalized** | Each administrator should choose their own products and destinations. | Nothing at import. Administrators create subscriptions by chatting with the agent. An empty product selection means all products. Assign the **Admin Digest Subscriber** role. |
-| **Shared (all updates)** | Everyone should get all updates, and no one needs to configure anything. | Set the Shared Digest variables below. The flow sends one all-products digest per run. No subscriptions or Subscriber role needed. |
-| **Both** | You want a shared channel plus optional personal digests. | Do both. |
+| MCP Server for Enterprise | Tenant Message Center and Service Health | Dedicated service account's access to the configured tenant and the server's actual permissions |
+| Release Communication Server | Public Microsoft 365 Roadmap and Azure Updates | Access required by the server |
+| Microsoft Learn Docs MCP Server | Official documentation and guidance | Access required by the connector |
 
-Shared digest environment variables (each defaults to `none`, which disables that channel):
+Before creating the Enterprise connection, configure its custom connector with the target tenant's values:
 
-| Variable | Value |
-| --- | --- |
-| **Shared Digest Teams Team ID** (`sample_SharedDigestTeamId`) | Team (Microsoft 365 group) ID of the shared team. Set together with the channel ID. The flow's digest account must be a member of the team. |
-| **Shared Digest Teams Channel ID** (`sample_SharedDigestChannelId`) | Channel ID in that team, for example `19:...@thread.tacv2`. |
-| **Shared Digest Email Recipients** (`sample_SharedDigestRecipients`) | Semicolon-separated addresses, for example an administrators distribution list. Only addresses in **Allowed Recipient Domains** receive it. |
-
-The shared digest uses the same filters, card template, and allowlist as personal digests. Its reporting period is shown in Central Standard Time, the flow's schedule time zone. Its result appears in the flow run history (action `Shared_digest_status`), because there's no subscription row to update. To find team and channel IDs, open the channel in Teams, select **Get link to channel**, and read `groupId` and the channel ID (the part after `/channel/`, URL-decoded) from the link.
-
-Import into a development environment first. Do not enable scheduled delivery against production users until testing is complete.
-
-## 4. Configure connections
-
-The package contains no source-tenant connection instances or credentials. Bind or create every connection in the target environment.
-
-Before creating the MCP Server for Enterprise connection, replace these sanitized custom-connector placeholders with values for the target tenant:
-
-| Placeholder | Required value |
+| Placeholder | Replace with |
 | --- | --- |
 | `00000000-0000-0000-0000-000000000000` | Target Microsoft Entra tenant ID |
 | `/replace-with-target-tenant-federated-identity-subject` | Federated identity subject configured for the target connector |
 
-Alternatively, select the connector's service-principal authentication option and provide the target tenant's application details during connection creation. Never store a client secret in the solution or repository.
+Configure the connector's application (client) ID, tenant ID, redirect URI, and federated identity credential for the target environment. The connector's application credential authenticates the OAuth client; it does not make Enterprise MCP access app-only. The current Enterprise MCP integration uses delegated user sign-in. Do not assume that a service-principal client-credential setting removes the need for a user connection.
 
-Create and test these connections in the target environment:
+### Centrally managed shared connections
 
-| Connection | Purpose |
+All three tools use **Agent author authentication** (`Maker`). A maintainer creates and binds each connection once in Copilot Studio. End users need only access to the published agent, not Copilot Studio editing permissions or individual tool connections.
+
+For Enterprise MCP:
+
+1. Create a dedicated user account such as `svc-adminupdates@<your-tenant-domain>`. Use a verified domain belonging to **your target tenant**, not an account or domain from a demonstration environment.
+2. Have a tenant administrator grant **Message Center Reader** and **Service Support Administrator**. The latter also grants support-ticket management permissions, so review that wider account privilege even though this agent's tools are read-only.
+3. Confirm the connector app has admin consent for delegated `MCP.ServiceMessage.Read.All` and `MCP.ServiceHealth.Read.All` on Microsoft MCP Server for Enterprise. These are MCP scopes, not Microsoft Graph application permissions.
+4. Create the Enterprise connection by signing in as the dedicated account through Microsoft's OAuth window. Complete any required password change, MFA registration, and Conditional Access checks. Do not disable tenant security policies to establish the connection.
+5. In the Enterprise tool editor, select **Agent author authentication**, choose the dedicated account's connection, and save. Verify the connection account, not just the maker who owns the agent.
+
+Create and bind the Release and Learn connections centrally as well. Use the authentication required by their servers. Public Release data does not require the Enterprise service account's tenant permissions.
+
+The service account is for reading research sources, not delivering digests. Store its credentials only in an approved vault and assign maintainers who can renew or replace its connection. No user password, token, or live connection is included in this repository or import package.
+
+Shared authentication means every authorized agent user can retrieve whatever the shared Enterprise connection can read. Individual users' Microsoft 365 roles do not limit those shared tool calls. Keep Microsoft sign-in required and restrict the agent to an explicitly approved administrator security group. A group is the list of people allowed to chat with the agent, not a grant of agent-editing access. Keep owner-only access until that group is configured.
+
+Review actual server permissions and available MCP operations. Research-only instructions are not a substitute for a least-privilege permission boundary.
+
+## 4. Select a model and test in chat
+
+The checked-in model may not be available in your environment. Select a supported model in Copilot Studio and validate the agent before publishing.
+
+Test:
+
+- A tenant Message Center lookup and a Service Health question.
+- A public roadmap or Azure update lookup.
+- A product-specific briefing for an explicit date range.
+- An all-products briefing without creating or saving preferences.
+- A past-dated roadmap item that needs current-state verification.
+- A cross-source investigation with conflicting dates or statuses.
+- A question about prerequisites or documented remediation.
+- No matching results, an unavailable server, and denied tenant access.
+- A permitted non-maker administrator can use all three tools through the published channel without creating individual connections. A user outside the approved group cannot use the agent.
+- A request to subscribe, schedule a digest, send email, or post a Teams card. The agent must explain that it only responds in chat.
+
+Check that responses preserve source IDs and links, distinguish public from tenant evidence, state the interpreted reporting period, and explain incomplete coverage rather than claiming exhaustive results.
+
+Product scope is conversational, not a persistent preference. A new conversation does not carry a saved subscription.
+
+### Evaluate natural-language routing
+
+The [routing test set](evals/routing-test-set.csv) contains 25 standalone admin prompts that never name an MCP server or tool. The [routing expectations](evals/routing-expectations.csv) map each question to required, conditional and forbidden evidence sources, plus checks on the actual operations and query intent.
+
+| Cases | Primary evidence needed |
 | --- | --- |
-| MCP Server for Enterprise | Tenant Message Center and Service Health data |
-| Release Communication Server | Microsoft 365 Roadmap and Azure Updates |
-| Microsoft Learn Docs MCP Server | Official Microsoft documentation |
-| Microsoft Dataverse | Digest subscription storage (agent and flow) |
-| Microsoft Copilot Studio | Lets the digest flow invoke the agent to retrieve Message Center posts |
-| Microsoft Teams | Adaptive Card delivery to a channel (flow only) |
-| Microsoft 365 Outlook | Email delivery (flow only) |
+| R01 to R05 | Enterprise: tenant Message Center or Service Health |
+| R06 to R09 | Release: public Microsoft 365 roadmap or Azure Updates |
+| R10 to R13 | Learn: official documentation |
+| R14 to R16 | Enterprise and Release: ambiguous product updates or tenant rollout |
+| R17 to R18 | Enterprise and Learn: tenant evidence with documented guidance |
+| R19 to R22 | All three sources: full briefing, investigation or current-state verification |
+| R23 to R25 | No evidence-source calls: missing context, unsupported delivery or greeting |
 
-The agent uses invoker authentication for its tools. It has no email or Teams tool, so it can't deliver anything itself. Grant only the permissions required by each connector and test with a non-administrator account where practical.
+To import and run:
 
-The `Daily-MC-Trigger` flow runs under its owner's connections. Use a dedicated digest account that:
+1. Open the development agent's **Evaluate** tab.
+2. Select **New evaluation > Single response**, then upload **only** [routing-test-set.csv](evals/routing-test-set.csv). It has the supported `question` and `expectedResponse` columns. Do not import the expectations matrix as an evaluation test set.
+3. Keep **General quality** for response relevance, grounding and safe abstention. Add **Capability use** checks using the paired expectations. The CSV import cannot configure graders or expected capabilities.
+4. Match cases by their question text if the UI changes their order. Each question runs in a fresh conversation; R23 deliberately has no prior feature context.
+5. Select the available tool capabilities for each required source. If the UI exposes only the parent MCP server, also inspect the run trace for the operation and query target. A server badge or a plausible answer alone does not prove correct routing.
+6. Click **Evaluate** to run, or **Save** for later. Inspect both the response and tool trace. Do not publish fixes until failures have been investigated and retested.
 
-- owns the flow's Dataverse, Copilot Studio, Teams, and Outlook connections;
-- can read Message Center posts through MCP Server for Enterprise (for example, a Message Center Reader role);
-- belongs to every team that subscribers choose for Teams delivery;
-- has the **Admin Digest Processor** security role.
+Source keys in the matrix:
 
-Digest email is sent from this account's mailbox.
+- `Enterprise`: MCP-Server-for-Enterprise. Require query discovery followed by `microsoft_graph_get` against the correct Message Center or Service Health resource, not merely a discovery call.
+- `Release`: Release Communication Server, displayed as Release Communication MCP in the repaired development agent. Verify Microsoft 365 roadmap operations versus Azure update operations according to the request.
+- `Learn`: Microsoft Learn Docs MCP Server. Verify a relevant documentation search and, when needed, a fetch of a discovered page.
+- `None`: no calls to these evidence sources. An internal investigation skill is not an evidence-source call.
 
-## 5. Assign security roles
+`PastDatedRoadmap` is conditional on the **actual relevant roadmap result** having a release or rollout date before the evaluation date. When true, require the matrix's conditional sources as well as its required sources. When false, avoid those extra calls for these focused questions. A prompt mentioning last month is not itself proof of a past-dated roadmap result. If the UI cannot express conditional or forbidden capabilities, inspect those conditions manually in the trace.
 
-The solution includes two least-privilege roles for the `Admin Digest Subscriptions` table. Assign them together with the environment's standard **Basic User** role.
+Live data changes, so the rubrics do not hardcode record counts, release dates, current incidents or expected feature status. MC000000000 is a synthetic exact-ID lookup target, not an assumed real post. Empty results are acceptable when reported honestly after the correct query. Authentication or service failures must be explicit; record them separately from a wrong-route failure, and do not mark end-to-end data access as passing just because the correct tool was attempted.
 
-| Role | Assign to | Access |
-| --- | --- | --- |
-| Admin Digest Subscriber | Every administrator who uses personal subscriptions | Create, read, write, append, and append to **their own** rows (user level). No delete. Not needed for a shared-only deployment. |
-| Admin Digest Processor | The digest flow's owner account only | Read and write **all** rows (organization level), to select active subscriptions and record delivery status. |
+Treat a routing case as passing only when all required sources were used, conditional rules were followed, forbidden sources were not used, the query targeted the right resource and the response met its rubric. Review fresh conversations for every case. Greeting, clarification and refusal cases should not initiate unsolicited research.
 
-Don't give subscribers organization-level access to the table. The agent's lookup tool has a fixed owner filter, and the Subscriber role is the enforcement boundary that keeps each administrator to their own rows.
+Validate the files locally before import:
 
-## 6. Verify the subscription data model
+```powershell
+.\evals\Test-RoutingEvalSet.ps1
+```
 
-Digest features use the imported user-owned Dataverse table named `Admin Digest Subscriptions`. Its sanitized logical name is `sample_admindigestsubscription`.
+This checks import shape, question limits, row parity, source sets and coverage, not the agent's runtime behavior. These test files do not change or train the agent, are not included in the solution ZIP and do not require a package rebuild. Keep tenant-specific evaluation results and raw tool payloads out of this public repository.
 
-The table must represent at least these values:
+## 5. Publish and share
 
-| Value | Logical name | Purpose |
-| --- | --- | --- |
-| Subscription name | `sample_newcolumn` | Human-readable profile name |
-| Selected products | `sample_selectedproducts` | One or more supported product labels, separated by `; `. Empty means all products. |
-| Teams enabled | `sample_teamsenabled` | Enables Teams delivery |
-| Email enabled | `sample_emailenabled` | Enables email delivery |
-| Team and channel | `sample_teamsteamid`, `sample_teamschannelid`, `sample_teamschannelname` | Teams destination values accepted by the connector |
-| Email recipients | `sample_emailrecipients` | One or more validated recipients |
-| Schedule day and time | `sample_scheduleday`, `sample_scheduletime` | Recorded delivery preference. The flow's recurrence controls when digests are sent. |
-| Time zone | `sample_timezone` | Calculates the rolling seven-day reporting window |
-| Active | `sample_active` | Enables or disables processing without deleting history |
-| Last-delivery fields | `sample_lastdeliveryat`, `sample_lastdeliverystatus` | Records delivery result and timing |
-| Owner | `ownerid` | Enforces the per-user subscription boundary. The agent's lookup always filters on `owninguser/azureactivedirectoryobjectid` equal to the signed-in user's Entra object ID. |
+After testing, publish deliberately and share **use access**, not editing access, with the approved administrator security group. Do not enable organization-wide access merely because the connection is shared.
 
-Keep the table user-owned. If the target table uses different logical names or choice labels, update the Dataverse tools, the flow, and the behavior instructions together.
+Configure supported chat channels separately if needed. A Teams chat channel does not require this agent to have a Teams connector for scheduled posting.
 
-## 7. Verify scheduled orchestration
+Recheck group enforcement in the intended channel, monitor shared-connection failures, and retest after account, credential, consent, role, or Conditional Access changes. Do not label tenant access verified solely because tool discovery succeeds; Message Center and Service Health calls must actually return successfully.
 
-`Daily-MC-Trigger` runs the whole digest pipeline. Review its recurrence before turning it on. As shipped, it runs weekly on Monday at 08:00 Central Standard Time. Every active subscription is processed on each run; the stored schedule day and time are recorded preferences only.
+## Existing digest-enabled installations
 
-On each run, the flow:
+The chat-only ZIP is a simpler installation, **not an automatic cleanup of older unmanaged components**. Reimporting an unmanaged solution does not reliably delete tables, flows, roles, environment variables, or connection references that are absent from a newer package.
 
-1. Calculates the rolling seven-day window ending at the scheduled run time.
-2. Invokes the agent **once**, with a fixed Microsoft Graph request and a structured output schema. The agent only retrieves posts and writes short impact and action summaries.
-3. Keeps only posts whose category is Plan for change or Prevent or fix issue **and** that are tagged Admin impact. It removes exact duplicates and sorts by group, action date, then last-modified date. This logic is deterministic in the flow, not decided by the model.
-4. For each active subscription, keeps posts whose services match the selected products (case-insensitive; an empty selection means all products), then renders Adaptive Cards from a fixed template. Cards hold at most 10 posts, with text fields truncated, and a compact fallback is posted if a card would exceed 27,000 characters, so every card stays under the Teams 28 KB limit.
-5. Emails only recipients in the allowed domains, posts cards only to the stored team and channel, and writes the outcome to **Last Delivery Status**.
-6. When any Shared Digest variable is set, sends one all-products digest to the shared team channel and/or email recipients, using the same rendering and allowlist.
-7. Isolates failures per subscription. If retrieval fails, it sends nothing, personal or shared, and records the failure on every active subscription.
+For the cleanest trial, use a new development environment. If simplifying an existing deployment:
 
-Keep connection identifiers and user destinations in Dataverse or environment-bound connections, not in the behavior files.
-## 8. Configure and test the agent
+1. Turn off the old `Daily-MC-Trigger` flow before making changes.
+2. Back up any subscription data you need to retain.
+3. Have an administrator review solution layers and dependencies before removing the old subscription table, digest flows, digest security roles, and digest environment variables.
+4. Remove obsolete agent subscription and delivery tools, and verify the remaining agent has only the three MCP tools.
+5. Remove unused connections only after checking that no other solution uses them.
 
-The checked-in model selection may not be available in every environment. Select a supported model in the target environment and revalidate the agent.
-
-Test at least these scenarios before publishing:
-
-- A simple Message Center lookup.
-- A roadmap lookup with a future date.
-- A past-dated roadmap item that requires current-state verification.
-- A cross-source investigation with conflicting dates or status.
-- Subscription creation, review, update, preview, and disable operations.
-- Teams-only, email-only, and dual-channel digest delivery (run the flow manually in the development environment).
-- A subscription with recipients outside the allowed domains. They must be skipped and counted in Last Delivery Status.
-- A subscription with no products selected. It must receive all qualifying posts.
-- If you use shared mode, a run with the Shared Digest variables set (check `Shared_digest_status` in the run history) and a chat session from an administrator with no subscription.
-- A no-result digest.
-- Connector denial, missing permissions, and partial delivery failure.
-- Attempts to access another user's Dataverse row. The lookup must return only the signed-in user's rows.
-
-Verify that responses preserve source IDs and links, distinguish public from tenant evidence, and never expose raw connector payloads or internal identifiers.
-
-After testing, publish the agent, confirm **Allowed Recipient Domains** contains only your tenant's domains, and then turn on the scheduled flow. Publishing makes the draft available to everyone with access to that agent, so treat it as a separate, deliberate operation.
+Do not uninstall the previous unmanaged solution or delete its data blindly. Nothing in this repository change deletes data or changes a deployed environment automatically.

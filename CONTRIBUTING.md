@@ -5,6 +5,7 @@
 - Use a development Power Platform environment.
 - Pull the latest agent state before editing.
 - Keep `.mcs/`, tokens, connection state, and local environment files out of Git.
+- Keep local editor MCP configuration (`.mcp.json` and `.vscode/`) out of Git. Work IQ is for local VS Code use, not an agent dependency.
 - Do not commit tenant data, user destinations, credentials, or raw tool output.
 - Preserve the evidence roles defined in `settings.mcs.yml` and the behavior skills.
 
@@ -18,11 +19,10 @@ Behavior changes should preserve these guarantees:
 - Public roadmap information does not prove tenant availability.
 - Microsoft Learn provides documentation, not tenant applicability.
 - Conflicting source values remain visible and attributed.
-- Subscription actions operate only on the authenticated user's Dataverse rows. Keep the fixed owner filter on `Get admin digest subscriptions`.
-- The agent has no delivery tools. Only the `Daily-MC-Trigger` flow sends digests, and it emails only recipients in `Allowed Recipient Domains`.
-- Digest filtering, ordering, and rendering stay deterministic in the flow. The agent retrieves and summarizes posts only.
-- Both usage modes keep working: personalized subscriptions (an empty product selection means all products) and the shared all-products digest configured through the Shared Digest environment variables. Chat never requires a subscription.
-- Delivery success is reported only after the corresponding action succeeds.
+- The agent responds only in chat. Do not add subscription storage, scheduled flows, email tools, or Teams posting tools to the base package.
+- Product scope is conversational. Do not claim to save preferences across conversations.
+- Any administrator can request a specific product or all products without subscribing.
+- Briefings state the reporting window and source limitations. Do not claim exhaustive coverage without evidence.
 
 ## Validation
 
@@ -32,6 +32,23 @@ Before submitting a pull request:
 2. Review the extension's local-to-remote changes.
 3. Test the affected behavior in a development agent.
 4. Confirm no `.mcs/` files or credentials are staged.
-5. Describe any required connection, table, flow, or model changes in the pull request.
+5. Verify the solution archive, source files, and checksum agree. Removing a feature from source alone does not remove it from the ZIP.
+6. Describe any required connection or model changes in the pull request.
+
+Run the local package regression check before submitting package changes:
+
+```powershell
+.\solution\Test-ChatOnlyPackage.ps1
+```
+
+It checks source-to-package consistency, retained components, removed digest dependencies, and the checksum. A local check is not a substitute for an import and chat test in a development environment.
+
+For routing or evaluation changes, also run:
+
+```powershell
+.\evals\Test-RoutingEvalSet.ps1
+```
+
+Import the natural-language cases and verify actual tool use against the paired routing expectations as described in [SETUP.md](SETUP.md#evaluate-natural-language-routing). Keep prompts independent of server names. Record runtime routing failures separately from connection failures, and never commit tenant-specific responses or raw tool traces.
 
 Do not publish a test agent that is shared with production users.

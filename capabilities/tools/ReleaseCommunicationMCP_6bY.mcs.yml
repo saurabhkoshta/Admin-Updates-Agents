@@ -2,7 +2,7 @@ mcs.metadata:
   componentName: Release Communication Server
   description: Public Microsoft 365 Roadmap items and Azure Updates, including roadmap IDs, release status, and public rollout timing. Not tenant-specific; never use it as evidence that a change affects the current tenant.
 kind: McpTool
-authMode: Invoker
+authMode: Maker
 connectionReference: sample_adminupdatesagent.cr.shared_sample-5frele.publicreleaseconnection
-connectorId: /providers/Microsoft.PowerApps/apis/shared_sample-5frelease-20communication-20server-publicconnector
+connectorId: /providers/Microsoft.PowerApps/apis/shared_sample-5frelease-20communication-20mcp-publicconnector
 operationId: InvokeServer

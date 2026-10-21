@@ -1,8 +1,8 @@
 mcs.metadata:
   componentName: MCP-Server-for-Enterprise
-  description: Read-only, tenant-specific Microsoft 365 Message Center posts (including category, tags, major-change flag, and affected services) and Service Health Dashboard incidents and advisories for the signed-in administrator's tenant. Use it to establish tenant impact, not for public roadmap information or product documentation.
+  description: Read-only, tenant-specific Microsoft 365 Message Center posts (including category, tags, major-change flag, and affected services) and Service Health Dashboard incidents and advisories for the centrally configured connection's tenant. Use it to establish tenant impact, not for public roadmap information or product documentation.
 kind: McpTool
-authMode: Invoker
+authMode: Maker
 connectionReference: sample_adminupdatesagent.cr.shared_sample-5fmcp-.publicenterpriseconnection
 connectorId: /providers/Microsoft.PowerApps/apis/shared_sample-5fmcp-2dserver-2dfor-2denterprise-publicconnector
 operationId: InvokeServer

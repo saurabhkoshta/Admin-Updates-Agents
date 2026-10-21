@@ -1,4 +1,4 @@
-{
+﻿{
   "swagger": "2.0",
   "info": {
     "title": "MCP-Server-for-Enterprise",
@@ -47,6 +47,11 @@
   "security": [
     {
       "oauth2-auth": [
+        "api://e8c77dc2-69b3-43f4-bc51-3213c9d915b4/.default"
+      ]
+    },
+    {
+      "oAuthClientCredentials": [
         "api://e8c77dc2-69b3-43f4-bc51-3213c9d915b4/.default"
       ]
     }

@@ -1,0 +1,30 @@
+﻿{
+  "swagger": "2.0",
+  "info": {
+    "title": "Release Communication MCP",
+    "description": "Read public Microsoft 365 Roadmap and Azure Updates through the official Microsoft Release Communications MCP server.",
+    "version": "1.0.0"
+  },
+  "host": "www.microsoft.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/releasecommunications/mcp": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Immediate Response"
+          }
+        },
+        "x-ms-agentic-protocol": "mcp-streamable-1.0",
+        "operationId": "InvokeServer",
+        "summary": "Release Communication MCP",
+        "description": "Read public Microsoft 365 Roadmap and Azure Updates through the official Microsoft Release Communications MCP server."
+      }
+    }
+  },
+  "securityDefinitions": {},
+  "security": []
+}

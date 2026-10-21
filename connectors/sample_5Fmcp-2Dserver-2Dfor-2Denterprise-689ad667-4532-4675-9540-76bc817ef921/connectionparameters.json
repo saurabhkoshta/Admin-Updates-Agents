@@ -1,4 +1,4 @@
-{
+﻿{
   "token": {
     "type": "oauthSetting",
     "oAuthSettings": {
@@ -16,7 +16,7 @@
         "IsOnbehalfofLoginSupported": true,
         "FederatedIdentityCredentials": {
           "Issuer": "https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/v2.0",
-          "Subject": "/replace-with-target-tenant-federated-identity-subject",
+                    "Subject": "/replace-with-target-tenant-federated-identity-subject",
           "Audience": "api://AzureADTokenExchange"
         }
       },

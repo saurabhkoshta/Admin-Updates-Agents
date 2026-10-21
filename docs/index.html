@@ -1,622 +1,406 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin Updates Agent · Architecture Dashboard</title>
-<meta name="description" content="Architecture, evidence model, behaviors, data model, and deployment checklist for the Admin Updates Agent Copilot Studio reference implementation.">
-<style>
-  :root {
-    --bg: #f5f7fb; --panel: #ffffff; --ink: #1b2330; --muted: #5b6878; --line: #dfe5ee;
-    --accent: #2f6fed; --accent-soft: #e7eefe;
-    --enterprise: #0f7b6c; --enterprise-soft: #e3f4f1;
-    --release: #7a4cc2; --release-soft: #efe8fa;
-    --learn: #c2610c; --learn-soft: #fdf0e3;
-    --data: #3b5bdb; --data-soft: #e8ecfd;
-    --deliver: #b8325b; --deliver-soft: #fbe7ee;
-    --ok: #1f8a4c; --warn: #b7791f; --bad: #c53030;
-    --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
-    --radius: 12px;
-    --mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-  }
-  [data-theme="dark"] {
-    --bg: #0f141b; --panel: #171e28; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2a3442;
-    --accent: #6d9bff; --accent-soft: #1d2a44;
-    --enterprise: #3cc7b1; --enterprise-soft: #12302c;
-    --release: #b08cf0; --release-soft: #2a2140;
-    --learn: #f0a24f; --learn-soft: #3a2917;
-    --data: #8ea2ff; --data-soft: #1e2647;
-    --deliver: #f07aa0; --deliver-soft: #3b1c28;
-    --shadow: 0 1px 2px rgba(0,0,0,.4);
-  }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; font: 15px/1.55 "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--ink); }
-  a { color: var(--accent); }
-  code { font-family: var(--mono); font-size: .88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; }
-
-  header.top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-  .top-inner { max-width: 1280px; margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 16px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; white-space: nowrap; }
-  .brand img { width: 30px; height: 30px; border-radius: 8px; }
-  nav.links { display: flex; gap: 4px; overflow-x: auto; flex: 1; }
-  nav.links a { color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; white-space: nowrap; font-size: 14px; }
-  nav.links a:hover { background: var(--accent-soft); color: var(--accent); }
-  button.theme { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-
-  main { max-width: 1280px; margin: 0 auto; padding: 24px; }
-  section { margin: 0 0 28px; scroll-margin-top: 70px; }
-  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: -.01em; }
-  h2 { font-size: 20px; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
-  h2 .num { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 2px 9px; }
-  h3 { font-size: 15px; margin: 0 0 8px; }
-  p.lead { color: var(--muted); margin: 0 0 14px; max-width: 900px; }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
-
-  .hero { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
-  .hero img { width: 120px; height: 120px; border-radius: 22px; box-shadow: var(--shadow); }
-  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  .badge { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
-  .disclaimer { font-size: 13px; color: var(--muted); margin-top: 10px; }
-
-  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); border-top: 3px solid var(--c, var(--accent)); }
-  .kpi .v { font-size: 28px; font-weight: 700; line-height: 1.1; }
-  .kpi .l { color: var(--muted); font-size: 13px; }
-
-  .diagram { overflow-x: auto; }
-  .diagram svg { width: 100%; min-width: 980px; height: auto; display: block; }
-  .diagram text { font-family: "Segoe UI", system-ui, sans-serif; fill: var(--ink); }
-  .diagram .sub { fill: var(--muted); font-size: 11px; }
-  .diagram .box { fill: var(--panel); stroke: var(--line); stroke-width: 1.2; }
-  .diagram .lane { fill: none; stroke: var(--line); stroke-dasharray: 5 5; }
-  .diagram .lane-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; fill: var(--muted); }
-  .diagram .edge { fill: none; stroke: var(--muted); stroke-width: 1.4; marker-end: url(#arrow); }
-  .diagram .edge.sched { stroke: var(--warn); stroke-dasharray: 6 4; marker-end: url(#arrow-warn); }
-  .diagram .edge-label { font-size: 10.5px; fill: var(--muted); }
-  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 13px; color: var(--muted); }
-  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; background: var(--c); vertical-align: -1px; }
-
-  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
-  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 14px; }
-  .source { border-left: 4px solid var(--c); }
-  .source .tag { display: inline-block; font-size: 11px; font-weight: 700; color: var(--c); background: var(--cs); border-radius: 6px; padding: 2px 8px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em; }
-  .source ul { margin: 6px 0 0; padding-left: 18px; }
-  .source li { margin: 3px 0; }
-  .yes { color: var(--ok); font-weight: 600; }
-  .no { color: var(--bad); font-weight: 600; }
-
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-  .tabs button { border: 1px solid var(--line); background: var(--panel); color: var(--muted); border-radius: 999px; padding: 7px 14px; cursor: pointer; font: inherit; font-size: 14px; }
-  .tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .tabpanel[hidden] { display: none; }
-  ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: 10px; }
-  ol.steps > li { counter-increment: s; position: relative; padding: 10px 12px 10px 48px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
-  ol.steps > li::before { content: counter(s); position: absolute; left: 12px; top: 10px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
-  ol.steps .who { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--c, var(--muted)); }
-
-  .classify { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-  .cls { border-radius: 10px; padding: 12px; background: var(--bg); border: 1px solid var(--line); }
-  .cls b { display: block; margin-bottom: 4px; }
-  .cls small { color: var(--muted); }
-
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--bg); position: sticky; top: 0; }
-  tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
-  .table-wrap { overflow: auto; max-height: 520px; border: 1px solid var(--line); border-radius: 10px; }
-  .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--cs); color: var(--c); }
-  input.filter { width: 100%; max-width: 360px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; margin-bottom: 10px; }
-
-  .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
-  .checklist label { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
-  .checklist input { margin-top: 3px; accent-color: var(--ok); width: 16px; height: 16px; }
-  .checklist input:checked + span { color: var(--muted); text-decoration: line-through; }
-  .progress { height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; margin: 6px 0 14px; }
-  .progress > div { height: 100%; width: 0; background: var(--ok); transition: width .25s; }
-
-  .guard { display: flex; gap: 12px; padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); }
-  .guard .ico { flex: 0 0 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--cs); color: var(--c); font-weight: 800; font-size: 12px; }
-  .guard p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
-
-  .gap { border-left: 4px solid var(--c); }
-  .gap .sev { font-size: 11px; font-weight: 700; color: var(--c); text-transform: uppercase; letter-spacing: .05em; }
-  .gap p { color: var(--muted); margin: 0; font-size: 14px; }
-
-  footer { color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0 40px; }
-
-  @media (max-width: 720px) {
-    .hero { grid-template-columns: 1fr; }
-    .hero img { display: none; }
-    .grid-2 { grid-template-columns: 1fr; }
-    main { padding: 16px; }
-  }
-  @media print {
-    header.top, button.theme, .tabs, input.filter { display: none; }
-    .tabpanel[hidden] { display: block; }
-    .table-wrap { max-height: none; }
-  }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Chat-only architecture and setup for the Admin Updates Agent. Three evidence sources, no custom subscription storage or scheduled delivery.">
+  <title>Admin Updates Agent | Chat-only architecture</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme = ["light", "dark"].includes(param)
+        ? param
+        : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 16px/1.6 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(32px, 5vw, 52px); line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 20px; }
+    h2 { font-size: 26px; line-height: 1.3; margin-bottom: 12px; }
+    h3 { font-size: 18px; line-height: 1.4; }
+    a { color: var(--cp-link); text-underline-offset: 3px; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button, input { border-radius: 0.625rem; }
+    button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 4px; }
+    code { font: 0.86em Consolas, "Courier New", Courier, monospace; background: var(--cp-surface-soft); padding: 2px 4px; border-radius: 4px; overflow-wrap: anywhere; }
+    .wrap { width: min(1160px, calc(100% - 40px)); margin: auto; }
+    .skip { position: absolute; left: 20px; top: -100px; z-index: 20; background: var(--cp-surface); padding: 12px; }
+    .skip:focus { top: 8px; }
+    header { border-bottom: 1px solid var(--cp-border); background: var(--cp-bg-elevated); }
+    .top { padding: 16px 0; display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .brand { font-weight: 700; display: flex; gap: 12px; align-items: center; }
+    .monogram { display: inline-grid; place-items: center; width: 40px; height: 40px; background: var(--cp-accent); color: var(--cp-accent-fg); border-radius: 0.625rem; font-size: 14px; }
+    nav { display: flex; gap: 16px; flex-wrap: wrap; margin-left: auto; }
+    nav a { color: var(--cp-text-muted); font-size: 14px; text-decoration: none; }
+    nav a:hover { color: var(--cp-accent); }
+    .theme { padding: 8px 12px; border: 1px solid var(--cp-border); background: var(--cp-surface); color: var(--cp-text); font-size: 14px; }
+    main { padding: 40px 0; }
+    section { margin-bottom: 48px; scroll-margin-top: 20px; }
+    .eyebrow { color: var(--cp-accent); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+    .hero { display: grid; grid-template-columns: 1.5fr 1fr; gap: 32px; align-items: start; }
+    .lead { font-size: 18px; color: var(--cp-text-muted); max-width: 720px; }
+    .muted { color: var(--cp-text-muted); }
+    .small { font-size: 14px; }
+    .panel { padding: 24px; border: 1px solid var(--cp-border); background: var(--cp-surface); border-radius: 16px; }
+    .hero .panel { background: var(--cp-bg-elevated); }
+    .hero .panel ul { padding-left: 20px; margin: 0; }
+    .hero .panel li { padding: 4px 0; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0 16px; }
+    .cta { display: inline-block; padding: 10px 16px; border: 1px solid var(--cp-accent); border-radius: 0.625rem; text-decoration: none; background: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 600; }
+    .cta.secondary { border-color: var(--cp-border); background: var(--cp-surface); color: var(--cp-text); }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 32px; }
+    .stat { border-top: 2px solid var(--cp-accent); padding-top: 12px; }
+    .stat strong { display: block; font-size: 32px; line-height: 1.2; }
+    .stat span { color: var(--cp-text-muted); font-size: 14px; }
+    .diagram { overflow-x: auto; padding: 16px; }
+    .diagram svg { width: 100%; min-width: 760px; display: block; }
+    .diagram rect { fill: var(--cp-surface); stroke: var(--cp-border-strong); }
+    .diagram .agent { stroke: var(--cp-accent); fill: var(--cp-accent-soft); stroke-width: 2; }
+    .diagram text { fill: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, sans-serif; }
+    .diagram .hint { fill: var(--cp-text-muted); font-size: 12px; }
+    .diagram .edge { fill: none; stroke: var(--cp-border-strong); stroke-width: 1.5; marker-end: url(#arrow); }
+    .diagram .reply { stroke: var(--cp-accent); marker-end: url(#replyArrow); }
+    .source-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+    .source-tabs button { text-align: left; padding: 16px; color: var(--cp-text); border: 1px solid var(--cp-border); background: var(--cp-surface); }
+    .source-tabs button strong, .source-tabs button span { display: block; }
+    .source-tabs button span { font-size: 13px; color: var(--cp-text-muted); margin-top: 4px; }
+    .source-tabs button[aria-selected="true"] { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+    .source-detail { margin-top: 12px; }
+    .source-detail p:last-child { margin-bottom: 0; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .prompt { padding: 20px; background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; }
+    .prompt .label { color: var(--cp-accent); font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+    .prompt blockquote { margin: 0 0 12px; font-size: 18px; }
+    .prompt p { color: var(--cp-text-muted); font-size: 14px; margin-bottom: 0; }
+    .notice { margin-top: 20px; padding: 16px 20px; border-left: 3px solid var(--cp-accent); background: var(--cp-bg-elevated); }
+    .notice p { margin-bottom: 0; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--cp-border); vertical-align: top; }
+    th { color: var(--cp-text-muted); font-size: 12px; text-transform: uppercase; }
+    .filter { width: min(100%, 400px); padding: 8px 12px; border: 1px solid var(--cp-border); color: var(--cp-text); background: var(--cp-surface); }
+    .progress { height: 8px; background: var(--cp-border); border-radius: 4px; margin: 12px 0 20px; overflow: hidden; }
+    #progressFill { width: 0; height: 100%; background: var(--cp-accent); transition: width .2s; }
+    .checklist { list-style: none; margin: 0; padding: 0; }
+    .checklist li + li { border-top: 1px solid var(--cp-border); }
+    .checklist label { padding: 12px 0; display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+    .checklist input { margin-top: 5px; width: 18px; height: 18px; accent-color: var(--cp-accent); flex: 0 0 auto; }
+    .checklist input:checked + span { color: var(--cp-text-muted); }
+    details { border: 1px solid var(--cp-border); border-radius: 0.625rem; padding: 16px; margin-top: 12px; background: var(--cp-surface); }
+    summary { cursor: pointer; font-weight: 600; }
+    details p { margin: 12px 0 0; }
+    footer { border-top: 1px solid var(--cp-border); padding: 24px 0; color: var(--cp-text-muted); font-size: 13px; }
+    footer a { margin-right: 16px; }
+    @media (max-width: 760px) {
+      .hero, .grid { grid-template-columns: 1fr; }
+      .source-tabs { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      nav { width: 100%; margin: 0; order: 3; }
+      .theme { margin-left: auto; }
+      .wrap { width: calc(100% - 32px); }
+      .panel { padding: 20px; }
+      .diagram { padding: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      #progressFill { transition: none; }
+    }
+    @media print {
+      header, .actions, .filter, #inventoryCount { display: none; }
+      main { padding: 0; }
+      .hero, .grid { grid-template-columns: 1fr; }
+      .diagram svg { min-width: 0; }
+      .panel, .prompt { break-inside: avoid; }
+    }
+  </style>
 </head>
 <body>
-<header class="top">
-  <div class="top-inner">
-    <div class="brand"><img src="icon.png" alt=""> Admin Updates Agent</div>
-    <nav class="links" aria-label="Sections">
-      <a href="#overview">Overview</a>
-      <a href="#modes">Usage modes</a>
-      <a href="#architecture">Architecture</a>
-      <a href="#evidence">Evidence model</a>
-      <a href="#flows">How it works</a>
-      <a href="#data">Data model</a>
-      <a href="#security">Security</a>
-      <a href="#inventory">Components</a>
-      <a href="#deploy">Deploy</a>
-      <a href="#gaps">Known gaps</a>
-    </nav>
-    <button class="theme" type="button" id="themeBtn" aria-label="Toggle dark mode">◐ Theme</button>
-  </div>
-</header>
-
-<main>
-  <section id="overview">
-    <div class="panel hero">
-      <div>
-        <h1>Admin Updates Agent</h1>
-        <p class="lead">A Copilot Studio reference agent for Microsoft 365 and Azure administrators. It correlates <strong>tenant communications</strong>, <strong>public release information</strong>, and <strong>Microsoft Learn documentation</strong>, then turns the evidence into concise, source-attributed operational guidance. A scheduled flow delivers a filtered <strong>weekly admin digest</strong> to Teams and email. Filtering, rendering, and delivery are deterministic, and email goes only to the tenant's allowed domains.</p>
-        <div class="badges">
-          <span class="badge">Copilot Studio · generative orchestration</span>
-          <span class="badge">3 MCP evidence sources</span>
-          <span class="badge">Integrated Entra ID auth</span>
-          <span class="badge">Unmanaged solution 1.1.0.0</span>
-          <span class="badge">MIT license</span>
+  <a class="skip" href="#main">Skip to content</a>
+  <header>
+    <div class="wrap top">
+      <div class="brand"><span class="monogram" aria-hidden="true">AU</span> Admin Updates Agent</div>
+      <nav aria-label="Main sections">
+        <a href="#architecture">Architecture</a>
+        <a href="#examples">In chat</a>
+        <a href="#inventory">Components</a>
+        <a href="#setup">Setup</a>
+        <a href="#boundaries">Boundaries</a>
+      </nav>
+      <button id="themeButton" class="theme" type="button" aria-pressed="false">Dark mode</button>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <section id="overview">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">Copilot Studio / chat-only</p>
+          <h1>Three sources.<br>One admin conversation.</h1>
+          <p class="lead">Understand Microsoft 365 and Azure changes without configuring a subscription database or a scheduled digest. Ask, investigate, and get a source-attributed answer in chat.</p>
+          <div class="actions">
+            <a class="cta" href="../solution/AdminUpdatesAgents_1_2_0_0.zip">Download solution</a>
+            <a class="cta secondary" href="../SETUP.md">Read setup guide</a>
+          </div>
+          <p class="small muted">Community reference implementation. Not developed, endorsed, or supported by Microsoft.</p>
         </div>
-        <p class="disclaimer">Independent community reference implementation. Not developed, endorsed, or supported by Microsoft.</p>
+        <aside class="panel" aria-labelledby="simpleTitle">
+          <p class="eyebrow">A smaller installation</p>
+          <h2 id="simpleTitle">Just the research agent</h2>
+          <ul>
+            <li>Message Center and Service Health</li>
+            <li>Microsoft 365 Roadmap and Azure Updates</li>
+            <li>Official Microsoft Learn guidance</li>
+            <li>On-demand product or all-product briefings</li>
+          </ul>
+          <p class="small muted" style="margin:16px 0 0">No saved preferences, background jobs, email delivery, or Teams posting tools.</p>
+        </aside>
       </div>
-      <img src="icon.png" alt="Admin Updates Agent icon">
-    </div>
-  </section>
-
-  <section aria-label="Key figures">
-    <div class="kpis">
-      <div class="kpi" style="--c:var(--enterprise)"><div class="v">3</div><div class="l">MCP evidence sources</div></div>
-      <div class="kpi" style="--c:var(--accent)"><div class="v">3</div><div class="l">Behavior skills</div></div>
-      <div class="kpi" style="--c:var(--release)"><div class="v">6</div><div class="l">Agent tools (no delivery tools)</div></div>
-      <div class="kpi" style="--c:var(--learn)"><div class="v">7</div><div class="l">Connection references</div></div>
-      <div class="kpi" style="--c:var(--data)"><div class="v">2</div><div class="l">Least-privilege security roles</div></div>
-      <div class="kpi" style="--c:var(--warn)"><div class="v">1</div><div class="l">Deterministic digest flow</div></div>
-      <div class="kpi" style="--c:var(--deliver)"><div class="v">27</div><div class="l">Supported digest products</div></div>
-    </div>
-  </section>
-
-  <section id="modes">
-    <h2><span class="num">00</span> Usage modes</h2>
-    <p class="lead">One solution, two ways to receive digests, usable separately or together. In both modes every administrator can chat with the agent about any product, with or without a subscription.</p>
-    <div class="grid-2">
-      <div class="panel source" style="--c:var(--data);--cs:var(--data-soft)">
-        <span class="tag">Mode 1 · Personalized</span>
-        <h3>Each administrator chooses their updates</h3>
-        <ul>
-          <li>Admins create a subscription <strong>by chatting with the agent</strong>: products, Teams channel and/or email, time zone.</li>
-          <li>Leave products empty to get <strong>all products</strong>.</li>
-          <li>Each subscription gets its own digest and <code>Last Delivery Status</code>.</li>
-          <li>Needs the <strong>Admin Digest Subscriber</strong> role for each admin.</li>
-        </ul>
+      <div class="stats" aria-label="Package scope">
+        <div class="stat"><strong>3</strong><span>MCP evidence sources</span></div>
+        <div class="stat"><strong>1</strong><span>Cross-source behavior</span></div>
+        <div class="stat"><strong>0</strong><span>Custom subscription tables</span></div>
+        <div class="stat"><strong>0</strong><span>Scheduled flows</span></div>
       </div>
-      <div class="panel source" style="--c:var(--warn);--cs:var(--learn-soft)">
-        <span class="tag">Mode 2 · Shared (all updates)</span>
-        <h3>Everyone gets everything, nothing to configure per admin</h3>
-        <ul>
-          <li>One administrator sets the <strong>Shared Digest</strong> environment variables once: team ID + channel ID and/or email recipients.</li>
-          <li>Each run sends one <strong>all-products</strong> digest to that channel or list.</li>
-          <li>No subscriptions or Subscriber role needed. The result is recorded in the flow run (<code>Shared_digest_status</code>).</li>
-          <li>Leave the variables as <code>none</code> to turn it off.</li>
-        </ul>
+    </section>
+
+    <section id="architecture">
+      <p class="eyebrow">01 / architecture</p>
+      <h2>Ask in chat. Follow the evidence.</h2>
+      <p class="muted">The agent routes the request to the sources that can answer it. Supporting searches add evidence, not assumed tenant impact.</p>
+      <div class="panel diagram">
+        <svg viewBox="0 0 1080 330" role="img" aria-labelledby="archTitle archDesc">
+          <title id="archTitle">Chat-only Admin Updates Agent architecture</title>
+          <desc id="archDesc">An approved administrator signs in and asks the agent a question. Centrally managed agent-author connections query Enterprise for tenant evidence, Release Communication for public updates, and Microsoft Learn for documentation. A grounded answer returns to the chat. Users do not need agent-editing access or individual tool connections. There is no subscription database or scheduled delivery.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="var(--cp-border-strong)"/></marker>
+            <marker id="replyArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="var(--cp-accent)"/></marker>
+          </defs>
+          <rect x="24" y="100" width="196" height="100" rx="10"/>
+          <text x="122" y="135" text-anchor="middle" font-size="17" font-weight="700">Administrator</text>
+          <text class="hint" x="122" y="158" text-anchor="middle">Specific products or all products</text>
+          <text class="hint" x="122" y="178" text-anchor="middle">Question + time range</text>
+          <rect class="agent" x="320" y="96" width="280" height="108" rx="16"/>
+          <text x="460" y="130" text-anchor="middle" font-size="18" font-weight="700">Admin Updates Agent</text>
+          <text class="hint" x="460" y="154" text-anchor="middle">Route, retrieve, correlate, explain</text>
+          <text class="hint" x="460" y="178" text-anchor="middle">Microsoft sign-in / shared connections</text>
+          <rect x="712" y="24" width="338" height="68" rx="10"/>
+          <text x="881" y="51" text-anchor="middle" font-size="16" font-weight="700">MCP Server for Enterprise</text>
+          <text class="hint" x="881" y="73" text-anchor="middle">Tenant Message Center + Service Health</text>
+          <rect x="712" y="116" width="338" height="68" rx="10"/>
+          <text x="881" y="143" text-anchor="middle" font-size="16" font-weight="700">Release Communication Server</text>
+          <text class="hint" x="881" y="165" text-anchor="middle">Public roadmap + Azure Updates</text>
+          <rect x="712" y="208" width="338" height="68" rx="10"/>
+          <text x="881" y="235" text-anchor="middle" font-size="16" font-weight="700">Microsoft Learn Docs MCP Server</text>
+          <text class="hint" x="881" y="257" text-anchor="middle">Documented behavior + guidance</text>
+          <path class="edge" d="M220 130 H320"/>
+          <text class="hint" x="270" y="114" text-anchor="middle">Ask</text>
+          <path class="edge reply" d="M320 178 H220"/>
+          <text class="hint" x="270" y="222" text-anchor="middle">Answer in chat</text>
+          <path class="edge" d="M600 126 C656 126 656 58 712 58"/>
+          <path class="edge" d="M600 150 H712"/>
+          <path class="edge" d="M600 174 C656 174 656 242 712 242"/>
+          <text class="hint" x="460" y="294" text-anchor="middle">Evidence stays attributed. Conflicts stay visible.</text>
+        </svg>
       </div>
-    </div>
-    <p class="disclaimer">Both modes use the same filters (Plan for change or Prevent or fix issue, tagged Admin impact), card template, 28 KB card limit, and tenant-domain email allowlist.</p>
-  </section>
-
-  <section id="architecture">
-    <h2><span class="num">01</span> Architecture</h2>
-    <p class="lead">Administrators chat with the agent interactively. A weekly flow invokes the agent once to retrieve Message Center posts, then filters, renders, and delivers the digest itself. The agent's tools run with invoker (user) authentication, and each MCP server has one distinct evidence role. The agent has no email or Teams tool.</p>
-    <div class="panel diagram">
-      <svg viewBox="0 0 1200 560" role="img" aria-labelledby="archTitle archDesc">
-        <title id="archTitle">Admin Updates Agent architecture</title>
-        <desc id="archDesc">Channels connect to the agent, which uses three behaviors and eight tools across evidence, state, and delivery layers. A scheduled flow invokes the agent weekly.</desc>
-        <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a96a8"/></marker>
-          <marker id="arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b7791f"/></marker>
-        </defs>
-
-        <rect class="lane" x="10" y="20" width="200" height="520" rx="12"/>
-        <text class="lane-label" x="24" y="42">ENTRY POINTS</text>
-        <rect class="lane" x="235" y="20" width="420" height="520" rx="12"/>
-        <text class="lane-label" x="249" y="42">COPILOT STUDIO AGENT</text>
-        <rect class="lane" x="680" y="20" width="510" height="520" rx="12"/>
-        <text class="lane-label" x="694" y="42">CONNECTED SERVICES</text>
-
-        <g>
-          <rect class="box" x="30" y="70" width="160" height="72" rx="10"/>
-          <text x="110" y="100" text-anchor="middle" font-weight="700" font-size="14">Administrator</text>
-          <text class="sub" x="110" y="120" text-anchor="middle">Teams · M365 Copilot · web</text>
-        </g>
-        <g>
-          <rect class="box" x="30" y="380" width="160" height="122" rx="10" style="stroke:var(--warn)"/>
-          <text x="110" y="404" text-anchor="middle" font-weight="700" font-size="14">Daily-MC-Trigger</text>
-          <text class="sub" x="110" y="423" text-anchor="middle">Weekly · Mon 08:00 Central</text>
-          <text class="sub" x="110" y="440" text-anchor="middle">Filter · sort · dedupe</text>
-          <text class="sub" x="110" y="457" text-anchor="middle">Card template (&lt; 28 KB)</text>
-          <text class="sub" x="110" y="474" text-anchor="middle">Tenant domain allowlist</text>
-          <text class="sub" x="110" y="491" text-anchor="middle">Personal + shared digests</text>
-        </g>
-
-        <g>
-          <rect class="box" x="255" y="62" width="380" height="118" rx="12" style="stroke:var(--accent);stroke-width:2"/>
-          <text x="445" y="92" text-anchor="middle" font-weight="700" font-size="16">Admin Updates Agent</text>
-          <text class="sub" x="445" y="112" text-anchor="middle">Generative orchestration · agent instructions + current date</text>
-          <text class="sub" x="445" y="130" text-anchor="middle">Integrated auth · group-membership access</text>
-          <text class="sub" x="445" y="148" text-anchor="middle">Web search disabled · grounded in tool results only</text>
-          <text class="sub" x="445" y="166" text-anchor="middle">Model: tenant-selected (package ships claude-opus-5)</text>
-        </g>
-
-        <g>
-          <rect x="255" y="210" width="380" height="84" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/>
-          <text x="275" y="236" font-weight="700" font-size="13.5">cross-source-investigation</text>
-          <text class="sub" x="275" y="256">Public change → tenant relevance → docs → known issues</text>
-          <text class="sub" x="275" y="274">Confidence: Confirmed · Likely related · Possible</text>
-        </g>
-        <g>
-          <rect x="255" y="308" width="380" height="84" rx="10" fill="var(--data-soft)" stroke="var(--data)"/>
-          <text x="275" y="334" font-weight="700" font-size="13.5">manage-admin-digest-subscription</text>
-          <text class="sub" x="275" y="354">Create · review · update · preview · disable</text>
-          <text class="sub" x="275" y="372">Fixed owner filter · confirmation before writes</text>
-        </g>
-        <g>
-          <rect x="255" y="406" width="380" height="96" rx="10" fill="var(--deliver-soft)" stroke="var(--deliver)"/>
-          <text x="275" y="432" font-weight="700" font-size="13.5">weekly-admin-digest</text>
-          <text class="sub" x="275" y="452">Scheduled data mode: fetch posts → structured output</text>
-          <text class="sub" x="275" y="470">Interactive mode: preview the digest in chat</text>
-          <text class="sub" x="275" y="488">No email or Teams tools · never claims delivery</text>
-        </g>
-
-        <g>
-          <rect x="700" y="62" width="230" height="64" rx="10" fill="var(--enterprise-soft)" stroke="var(--enterprise)"/>
-          <text x="815" y="88" text-anchor="middle" font-weight="700" font-size="13">MCP Server for Enterprise</text>
-          <text class="sub" x="815" y="108" text-anchor="middle">Message Center · Service Health</text>
-        </g>
-        <g>
-          <rect x="700" y="138" width="230" height="64" rx="10" fill="var(--release-soft)" stroke="var(--release)"/>
-          <text x="815" y="164" text-anchor="middle" font-weight="700" font-size="13">Release Communication</text>
-          <text class="sub" x="815" y="184" text-anchor="middle">M365 Roadmap · Azure Updates</text>
-        </g>
-        <g>
-          <rect x="700" y="214" width="230" height="64" rx="10" fill="var(--learn-soft)" stroke="var(--learn)"/>
-          <text x="815" y="240" text-anchor="middle" font-weight="700" font-size="13">Microsoft Learn Docs MCP</text>
-          <text class="sub" x="815" y="260" text-anchor="middle">Docs · known issues · remediation</text>
-        </g>
-        <text class="lane-label" x="945" y="44" style="fill:var(--enterprise)">EVIDENCE</text>
-
-        <g>
-          <rect x="700" y="300" width="230" height="92" rx="10" fill="var(--data-soft)" stroke="var(--data)"/>
-          <text x="815" y="324" text-anchor="middle" font-weight="700" font-size="13">Microsoft Dataverse</text>
-          <text class="sub" x="815" y="343" text-anchor="middle">Admin Digest Subscriptions</text>
-          <text class="sub" x="815" y="360" text-anchor="middle">Agent: own rows · Flow: active rows</text>
-          <text class="sub" x="815" y="377" text-anchor="middle">Subscriber / Processor roles</text>
-        </g>
-        <text class="lane-label" x="945" y="350" style="fill:var(--data)">STATE</text>
-
-        <g>
-          <rect x="700" y="410" width="230" height="52" rx="10" fill="var(--deliver-soft)" stroke="var(--deliver)"/>
-          <text x="815" y="433" text-anchor="middle" font-weight="700" font-size="13">Microsoft Teams</text>
-          <text class="sub" x="815" y="450" text-anchor="middle">Flow bot · stored channel only</text>
-        </g>
-        <g>
-          <rect x="700" y="472" width="230" height="52" rx="10" fill="var(--deliver-soft)" stroke="var(--deliver)"/>
-          <text x="815" y="495" text-anchor="middle" font-weight="700" font-size="13">Microsoft 365 Outlook</text>
-          <text class="sub" x="815" y="512" text-anchor="middle">Allowed tenant domains only</text>
-        </g>
-        <text class="lane-label" x="945" y="470" style="fill:var(--deliver)">DELIVERY (FLOW ONLY)</text>
-
-        <g>
-          <rect class="box" x="1030" y="62" width="145" height="216" rx="10"/>
-          <text x="1102" y="84" text-anchor="middle" font-weight="700" font-size="12">Proves</text>
-          <text class="sub" x="1102" y="100" text-anchor="middle">Tenant impact,</text>
-          <text class="sub" x="1102" y="114" text-anchor="middle">rollout timing, actions</text>
-          <text class="sub" x="1102" y="170" text-anchor="middle">Public change, status,</text>
-          <text class="sub" x="1102" y="184" text-anchor="middle">roadmap IDs</text>
-          <text class="sub" x="1102" y="244" text-anchor="middle">Product behavior,</text>
-          <text class="sub" x="1102" y="258" text-anchor="middle">availability label</text>
-        </g>
-
-        <path class="edge" d="M190,106 C225,106 225,121 255,121"/>
-        <text class="edge-label" x="196" y="96">chat (SSO)</text>
-        <path class="edge sched" d="M190,446 C225,446 225,458 255,458"/>
-        <text class="edge-label" x="32" y="372" style="fill:var(--warn)">invoke once to retrieve →</text>
-
-        <path class="edge" d="M635,94 C665,94 670,94 700,94"/>
-        <path class="edge" d="M635,121 C668,121 668,170 700,170"/>
-        <path class="edge" d="M635,150 C668,150 668,246 700,246"/>
-        <path class="edge" d="M635,350 C668,350 668,346 700,346"/>
-        <path class="edge sched" d="M110,502 L110,530 L668,530 C684,530 684,392 700,392" style="marker-end:url(#arrow-warn)"/>
-        <path class="edge sched" d="M668,530 C686,530 686,436 700,436"/>
-        <path class="edge sched" d="M668,530 C686,530 686,498 700,498"/>
-        <text class="edge-label" x="300" y="524" style="fill:var(--warn)">flow reads active rows, delivers cards and allowlisted email, records status</text>
-        <path class="edge" d="M930,94 L1030,94"/>
-        <path class="edge" d="M930,170 L1030,170"/>
-        <path class="edge" d="M930,246 L1030,246"/>
-      </svg>
-      <div class="legend">
-        <span style="--c:var(--enterprise)">Tenant evidence</span>
-        <span style="--c:var(--release)">Public release evidence</span>
-        <span style="--c:var(--learn)">Documentation evidence</span>
-        <span style="--c:var(--data)">Subscription state</span>
-        <span style="--c:var(--deliver)">Digest delivery</span>
-        <span style="--c:var(--warn)">Scheduled trigger</span>
+      <div class="source-tabs" role="tablist" aria-label="Evidence roles">
+        <button id="tenantTab" role="tab" aria-controls="tenantPanel" aria-selected="true"><strong>Tenant evidence</strong><span>Enterprise MCP</span></button>
+        <button id="publicTab" role="tab" aria-controls="publicPanel" aria-selected="false" tabindex="-1"><strong>Public release evidence</strong><span>Release Communication MCP</span></button>
+        <button id="docsTab" role="tab" aria-controls="docsPanel" aria-selected="false" tabindex="-1"><strong>Documentation</strong><span>Microsoft Learn MCP</span></button>
       </div>
-    </div>
-  </section>
+      <div id="tenantPanel" class="panel source-detail" role="tabpanel" aria-labelledby="tenantTab" tabindex="0">
+        <h3>What applies to this tenant?</h3>
+        <p>Message Center posts and Service Health incidents establish tenant-specific findings. Keep the returned IDs, dates, status, affected services, and links. No returned match means the search found no match, not proof that no issue exists.</p>
+      </div>
+      <div id="publicPanel" class="panel source-detail" role="tabpanel" aria-labelledby="publicTab" tabindex="0" hidden>
+        <h3>What is changing publicly?</h3>
+        <p>Roadmap items and Azure Updates describe public changes and release timing. They do not prove tenant availability. Past-dated roadmap items need current supporting evidence before being labelled upcoming or available.</p>
+      </div>
+      <div id="docsPanel" class="panel source-detail" role="tabpanel" aria-labelledby="docsTab" tabindex="0" hidden>
+        <h3>What does Microsoft document?</h3>
+        <p>Learn supplies documented behavior, prerequisites, limitations, known issues, and procedures. A documentation page is not evidence of an active tenant incident. Keep Microsoft-stated guidance distinct from the agent's suggestions.</p>
+      </div>
+    </section>
 
-  <section id="evidence">
-    <h2><span class="num">02</span> Evidence model</h2>
-    <p class="lead">Each source has one authority. The agent never uses a source outside its role, keeps each source's IDs, dates, and links, and shows conflicts instead of silently reconciling them.</p>
-    <div class="grid-3">
-      <div class="panel source" style="--c:var(--enterprise);--cs:var(--enterprise-soft)">
-        <span class="tag">Tenant</span>
-        <h3>MCP Server for Enterprise</h3>
-        <ul>
-          <li><span class="yes">Proves</span> whether and how <em>this tenant</em> is affected</li>
-          <li>Message Center posts: category, tags, major change, services</li>
-          <li>Service Health incidents and advisories</li>
-          <li><span class="no">Read-only</span>: never acknowledges or remediates items</li>
-        </ul>
+    <section id="examples">
+      <p class="eyebrow">02 / in chat</p>
+      <h2>Choose the scope in your question.</h2>
+      <p class="muted">No enrollment step. No product list to maintain. Conversation context helps follow-up questions, but there are no saved subscription preferences.</p>
+      <div class="grid">
+        <article class="prompt"><p class="label">A product briefing</p><blockquote>"What changed for Microsoft Teams in the last seven days?"</blockquote><p>Retrieve relevant evidence for that product and state the exact reporting period.</p></article>
+        <article class="prompt"><p class="label">All products</p><blockquote>"Show admin-impact updates across all products this week."</blockquote><p>Do not restrict the product scope. Explain source coverage, paging limitations, and unavailable sources.</p></article>
+        <article class="prompt"><p class="label">Tenant relevance</p><blockquote>"Is this roadmap feature rolling out to our tenant?"</blockquote><p>Correlate public information with tenant evidence. Do not infer tenant impact from the public roadmap alone.</p></article>
+        <article class="prompt"><p class="label">Technical guidance</p><blockquote>"What are the prerequisites and known issues for this change?"</blockquote><p>Find clearly matching official documentation and link to the source.</p></article>
       </div>
-      <div class="panel source" style="--c:var(--release);--cs:var(--release-soft)">
-        <span class="tag">Public</span>
-        <h3>Release Communication Server</h3>
-        <ul>
-          <li><span class="yes">Proves</span> what is changing publicly and when</li>
-          <li>Microsoft 365 Roadmap items and Azure Updates</li>
-          <li>Roadmap IDs, release status, rollout timing</li>
-          <li><span class="no">Does not</span> prove tenant availability</li>
-        </ul>
-      </div>
-      <div class="panel source" style="--c:var(--learn);--cs:var(--learn-soft)">
-        <span class="tag">Documentation</span>
-        <h3>Microsoft Learn Docs MCP Server</h3>
-        <ul>
-          <li><span class="yes">Proves</span> documented behavior and procedures</li>
-          <li>Prerequisites, limitations, known issues, remediation</li>
-          <li>Availability labels (preview / GA) update product state</li>
-          <li><span class="no">Does not</span> rewrite roadmap dates or prove tenant impact</li>
-        </ul>
-      </div>
-    </div>
+      <div class="notice"><p><strong>On demand, not scheduled.</strong> The agent can write a briefing here in chat. It cannot subscribe you, save a schedule, email a digest, or post it to a Teams channel later.</p></div>
+    </section>
 
-    <div class="panel" style="margin-top:14px">
-      <h3>Past-due roadmap reclassification</h3>
-      <p class="lead" style="margin-bottom:10px">When a roadmap date is earlier than today, the original status is kept as history. The agent searches Enterprise and Learn again and assigns one current state from the newest evidence:</p>
-      <div class="classify">
-        <div class="cls"><b>Upcoming</b><small>A current source gives a future date</small></div>
-        <div class="cls"><b>Rolling out</b><small>Message Center or docs say rollout is in progress</small></div>
-        <div class="cls"><b>Preview</b><small>Learn explicitly says preview</small></div>
-        <div class="cls"><b>Generally available</b><small>Learn explicitly says GA</small></div>
-        <div class="cls"><b>Delayed or cancelled</b><small>Roadmap or Message Center says so</small></div>
-        <div class="cls"><b>Status unresolved</b><small>Supporting searches are inconclusive</small></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="flows">
-    <h2><span class="num">03</span> How it works</h2>
-    <div class="panel">
-      <div class="tabs" role="tablist" aria-label="Scenarios">
-        <button role="tab" aria-selected="true" aria-controls="t1" id="b1">Ask a question</button>
-        <button role="tab" aria-selected="false" aria-controls="t2" id="b2" tabindex="-1">Cross-source investigation</button>
-        <button role="tab" aria-selected="false" aria-controls="t3" id="b3" tabindex="-1">Manage subscription</button>
-        <button role="tab" aria-selected="false" aria-controls="t4" id="b4" tabindex="-1">Weekly digest</button>
-      </div>
-
-      <div class="tabpanel" role="tabpanel" id="t1" aria-labelledby="b1">
-        <ol class="steps">
-          <li><div class="who">Administrator</div>Asks about a Message Center post, incident, roadmap item, Azure update, or product behavior.</li>
-          <li><div class="who">Orchestrator</div>Infers intent from product names, IDs, dates, and keywords, then interprets relative dates against the current date in the instructions.</li>
-          <li><div class="who" style="--c:var(--enterprise)">Routing</div>Tenant → Enterprise. Public → Release Communication. "How / why / fix" → Learn. If ambiguous, it searches both Enterprise and Release instead of asking.</li>
-          <li><div class="who">Grounding</div>Answers only from tool results and keeps IDs, dates, status, and links. No match means "no matches found" for the stated topic and date range, not "nothing exists".</li>
-          <li><div class="who">Response</div>Direct answer first. Results are grouped by source, and agent guidance is labeled separately from Microsoft-stated actions.</li>
-        </ol>
-      </div>
-
-      <div class="tabpanel" role="tabpanel" id="t2" aria-labelledby="b2" hidden>
-        <ol class="steps">
-          <li><div class="who">Primary source</div>Queries the source that matches the main evidence need: public change, tenant impact, or documented behavior.</li>
-          <li><div class="who">Anchors</div>Extracts exact product and feature names, Message Center IDs, roadmap IDs, error codes, and versions for follow-up searches.</li>
-          <li><div class="who">Supporting sources</div>Adds a source only when it fills a distinct evidence role. Past-due roadmap items always trigger Enterprise and Learn checks.</li>
-          <li><div class="who">Correlation</div>Labels each relationship <code>Confirmed</code>, <code>Likely related</code>, or <code>Possible supporting information</code>. It never merges records.</li>
-          <li><div class="who">Briefing</div>Primary finding → supporting evidence → tenant relevance → documentation → known issues → guidance (Microsoft-stated / suggested / needs validation).</li>
-        </ol>
-      </div>
-
-      <div class="tabpanel" role="tabpanel" id="t3" aria-labelledby="b3" hidden>
-        <ol class="steps">
-          <li><div class="who" style="--c:var(--data)">Lookup</div>Every review, update, preview, or disable request starts with <code>Get admin digest subscriptions</code>. Its table, columns, and owner filter (<code>owninguser/azureactivedirectoryobjectid eq System.User.Id</code>) are fixed values, so the model can't widen the query.</li>
-          <li><div class="who">Validate</div>Requires at least one supported product and one delivery method, plus Teams team and channel or valid email recipients. Warns about recipients outside the tenant's domains.</li>
-          <li><div class="who">Confirm</div>Summarizes the values or changes and waits for explicit confirmation before any write.</li>
-          <li><div class="who" style="--c:var(--data)">Write</div>Creates or updates only the caller's row, changing only the fields they asked for. Disable sets <code>Active = No</code> and keeps history.</li>
-          <li><div class="who" style="--c:var(--deliver)">Preview</div>Runs <code>weekly-admin-digest</code> in interactive preview mode and shows the digest in chat. Nothing is sent; delivery belongs to the flow.</li>
-        </ol>
-      </div>
-
-      <div class="tabpanel" role="tabpanel" id="t4" aria-labelledby="b4" hidden>
-        <ol class="steps">
-          <li><div class="who" style="--c:var(--warn)">Trigger</div><code>Daily-MC-Trigger</code> runs weekly. The reporting window is the seven days ending at the scheduled run time.</li>
-          <li><div class="who" style="--c:var(--enterprise)">Retrieve (agent, once)</div>Invokes the agent once, with a fixed Microsoft Graph request and a structured output schema. The agent returns every post with short impact and action summaries, and sends nothing.</li>
-          <li><div class="who">Filter (flow)</div>category ∈ {planForChange, preventOrFixIssue} AND tag = Admin impact, case-insensitive. Missing values never match. Exact duplicates are removed.</li>
-          <li><div class="who">Order (flow)</div>Sorted by group (Plan for change / Prevent or fix issue × Major Yes / No), then action date (soonest first), then last modified (newest first).</li>
-          <li><div class="who" style="--c:var(--data)">Per subscription (flow)</div>Keeps posts whose services match the selected products, case-insensitive; an empty selection means all products. Each subscription is isolated, so one failure doesn't block the others.</li>
-          <li><div class="who" style="--c:var(--warn)">Shared digest (flow)</div>If any Shared Digest variable is set, sends one all-products digest to the shared team channel and/or email list, using the same rendering and allowlist.</li>
-          <li><div class="who" style="--c:var(--deliver)">Render (flow)</div>Adaptive Card 1.4 built from a fixed template, at most 10 posts per card, with text truncated. A compact card is used above 27,000 characters, so no card reaches 28 KB.</li>
-          <li><div class="who" style="--c:var(--deliver)">Deliver (flow)</div>Posts cards to the stored team and channel. Emails only recipients whose domain is in <code>Allowed Recipient Domains</code>; all others are skipped and counted.</li>
-          <li><div class="who" style="--c:var(--data)">Record (flow)</div>Writes <code>Last Delivery At</code> and a per-channel <code>Last Delivery Status</code>. If retrieval fails, nothing is sent and every active subscription records the failure.</li>
-        </ol>
-      </div>
-    </div>
-  </section>
-
-  <section id="data">
-    <h2><span class="num">04</span> Data model: <code>sample_admindigestsubscription</code></h2>
-    <p class="lead">A user-owned Dataverse table. The <strong>Admin Digest Subscriber</strong> role (user level) limits each administrator to their own rows. The <strong>Admin Digest Processor</strong> role (organization level) is only for the flow's owner account.</p>
-    <div class="panel">
-      <div class="table-wrap">
+    <section id="inventory">
+      <p class="eyebrow">03 / components</p>
+      <h2>The package is the research experience.</h2>
+      <label for="inventoryFilter" class="small">Find a component</label><br>
+      <input id="inventoryFilter" class="filter" type="search" placeholder="Search components">
+      <p id="inventoryCount" class="small muted" role="status">8 components shown</p>
+      <div class="panel table-wrap">
         <table>
-          <thead><tr><th>Column</th><th>Logical name</th><th>Type</th><th>Written by</th></tr></thead>
-          <tbody>
-            <tr><td>Subscription Name</td><td><code>sample_newcolumn</code></td><td>Text (primary name)</td><td>User</td></tr>
-            <tr><td>Selected Products</td><td><code>sample_selectedproducts</code></td><td>Text, <code>; </code>-separated labels; empty = all products</td><td>User</td></tr>
-            <tr><td>Teams Enabled</td><td><code>sample_teamsenabled</code></td><td>Yes/No</td><td>User</td></tr>
-            <tr><td>Teams Team ID</td><td><code>sample_teamsteamid</code></td><td>Text</td><td>User</td></tr>
-            <tr><td>Teams Channel ID / Name</td><td><code>sample_teamschannelid</code>, <code>sample_teamschannelname</code></td><td>Text</td><td>User</td></tr>
-            <tr><td>Email Enabled</td><td><code>sample_emailenabled</code></td><td>Yes/No</td><td>User</td></tr>
-            <tr><td>Email Recipients</td><td><code>sample_emailrecipients</code></td><td>Text, <code>; </code>-separated</td><td>User</td></tr>
-            <tr><td>Subscriber Email</td><td><code>sample_subscriberemail</code></td><td>Text</td><td>User</td></tr>
-            <tr><td>Schedule Day</td><td><code>sample_scheduleday</code></td><td>Choice (Mon <code>410710000</code> … Sun <code>410710006</code>), recorded preference</td><td>User</td></tr>
-            <tr><td>Schedule Time</td><td><code>sample_scheduletime</code></td><td>Text, <code>HH:mm</code>, recorded preference</td><td>User</td></tr>
-            <tr><td>Time Zone</td><td><code>sample_timezone</code></td><td>Text (Windows time-zone name), used for the displayed reporting period</td><td>User</td></tr>
-            <tr><td>Active</td><td><code>sample_active</code></td><td>Yes/No</td><td>User</td></tr>
-            <tr><td>Last Delivery At</td><td><code>sample_lastdeliveryat</code></td><td>Date and time</td><td>Digest flow</td></tr>
-            <tr><td>Last Delivery Status</td><td><code>sample_lastdeliverystatus</code></td><td>Text, per channel (for example "Email sent to 2 recipient(s); skipped 1 …")</td><td>Digest flow</td></tr>
-            <tr><td>Owner</td><td><code>ownerid</code></td><td>User or team</td><td>Dataverse</td></tr>
+          <thead><tr><th scope="col">Component</th><th scope="col">Purpose</th><th scope="col">Source</th></tr></thead>
+          <tbody id="inventoryRows">
+            <tr><td>Admin Updates Agent</td><td>Authentication, routing, grounding, and response instructions</td><td><a href="../settings.mcs.yml">Agent settings</a></td></tr>
+            <tr><td>cross-source-investigation</td><td>Evidence correlation and current-status checks</td><td><a href="../behaviors/cross-source-investigation/SKILL.md">Behavior</a></td></tr>
+            <tr><td>MCP Server for Enterprise</td><td>Message Center and Service Health</td><td><a href="../capabilities/tools/MCP-Server-for-Enterprise_PPB.mcs.yml">Tool binding</a></td></tr>
+            <tr><td>Release Communication Server</td><td>Microsoft 365 Roadmap and Azure Updates</td><td><a href="../capabilities/tools/ReleaseCommunicationServer_QAL.mcs.yml">Tool binding</a></td></tr>
+            <tr><td>Microsoft Learn Docs MCP Server</td><td>Official documentation and guidance</td><td><a href="../capabilities/tools/MicrosoftLearnDocsMCP-MicrosoftLearnDocsMCPServer_l9i.mcs.yml">Tool binding</a></td></tr>
+            <tr><td>Two custom connectors</td><td>Sanitized Enterprise and Release connector definitions</td><td><a href="../connectors/">Connectors</a></td></tr>
+            <tr><td>Three connection references</td><td>Bind the evidence sources in your environment</td><td><a href="../infrastructure/connections/">Connection mappings</a></td></tr>
+            <tr><td>Unmanaged chat-only solution</td><td>Agent, behavior, MCP bindings, and connectors. No custom table, flow, digest roles, or environment variables.</td><td><a href="../solution/AdminUpdatesAgents_1_2_0_0.zip">Importable ZIP</a></td></tr>
           </tbody>
         </table>
       </div>
-    </div>
-  </section>
+      <p class="small muted">Filename and solution version remain 1.2.0.0. Use the current branch's <a href="../solution/SHA256SUMS.txt">checksum</a> to identify this build rather than an older Release asset.</p>
+    </section>
 
-  <section id="security">
-    <h2><span class="num">05</span> Security and trust boundaries</h2>
-    <div class="grid-2">
-      <div class="guard" style="--c:var(--accent);--cs:var(--accent-soft)"><div class="ico">ID</div><div><b>Identity</b><p>Integrated (Entra ID) authentication is always required, and access is limited by group membership.</p></div></div>
-      <div class="guard" style="--c:var(--enterprise);--cs:var(--enterprise-soft)"><div class="ico">INV</div><div><b>Invoker connections</b><p>Every tool runs as the signed-in user, so connector permissions define the reachable data.</p></div></div>
-      <div class="guard" style="--c:var(--data);--cs:var(--data-soft)"><div class="ico">DV</div><div><b>Fixed owner filter + roles</b><p>The subscription lookup's table, columns, and owner filter are fixed values the model can't change. The Subscriber role enforces own-rows-only access in Dataverse.</p></div></div>
-      <div class="guard" style="--c:var(--deliver);--cs:var(--deliver-soft)"><div class="ico">TX</div><div><b>Flow-only, tenant-only delivery</b><p>The agent has no email or Teams tool. The flow emails only recipients in <code>Allowed Recipient Domains</code> (your tenant's domains) and posts only to the stored channel.</p></div></div>
-      <div class="guard" style="--c:var(--learn);--cs:var(--learn-soft)"><div class="ico">RO</div><div><b>Read-only tenant access</b><p>The agent never claims to acknowledge, dismiss, or remediate a tenant item.</p></div></div>
-      <div class="guard" style="--c:var(--release);--cs:var(--release-soft)"><div class="ico">PII</div><div><b>No leakage</b><p>Never exposes credentials, connection details, internal identifiers, or raw tool payloads. The package ships sanitized placeholders.</p></div></div>
-    </div>
-  </section>
-
-  <section id="inventory">
-    <h2><span class="num">06</span> Component inventory</h2>
-    <div class="panel">
-      <input class="filter" id="invFilter" type="search" placeholder="Filter components…" aria-label="Filter components">
-      <div class="table-wrap">
-        <table id="invTable">
-          <thead><tr><th>Component</th><th>Type</th><th>Layer</th><th>Source</th></tr></thead>
-          <tbody>
-            <tr><td>Admin Updates Agent</td><td>Agent settings and instructions</td><td><span class="pill" style="--c:var(--accent);--cs:var(--accent-soft)">Agent</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/settings.mcs.yml"><code>settings.mcs.yml</code></a></td></tr>
-            <tr><td>cross-source-investigation</td><td>Inline agent skill</td><td><span class="pill" style="--c:var(--accent);--cs:var(--accent-soft)">Behavior</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/behaviors/cross-source-investigation/SKILL.md"><code>behaviors/cross-source-investigation/</code></a></td></tr>
-            <tr><td>manage-admin-digest-subscription</td><td>Inline agent skill</td><td><span class="pill" style="--c:var(--accent);--cs:var(--accent-soft)">Behavior</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/behaviors/manage-admin-digest-subscription/SKILL.md"><code>behaviors/manage-admin-digest-subscription/</code></a></td></tr>
-            <tr><td>weekly-admin-digest</td><td>Inline agent skill</td><td><span class="pill" style="--c:var(--accent);--cs:var(--accent-soft)">Behavior</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/behaviors/weekly-admin-digest/SKILL.md"><code>behaviors/weekly-admin-digest/</code></a></td></tr>
-            <tr><td>MCP-Server-for-Enterprise</td><td>MCP tool (custom connector)</td><td><span class="pill" style="--c:var(--enterprise);--cs:var(--enterprise-soft)">Evidence</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/capabilities/tools/MCP-Server-for-Enterprise_PPB.mcs.yml"><code>capabilities/tools/MCP-Server-for-Enterprise_PPB.mcs.yml</code></a></td></tr>
-            <tr><td>Release Communication Server</td><td>MCP tool (custom connector)</td><td><span class="pill" style="--c:var(--release);--cs:var(--release-soft)">Evidence</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/capabilities/tools/ReleaseCommunicationServer_QAL.mcs.yml"><code>capabilities/tools/ReleaseCommunicationServer_QAL.mcs.yml</code></a></td></tr>
-            <tr><td>Microsoft Learn Docs MCP Server</td><td>MCP tool (certified connector)</td><td><span class="pill" style="--c:var(--learn);--cs:var(--learn-soft)">Evidence</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/capabilities/tools/MicrosoftLearnDocsMCP-MicrosoftLearnDocsMCPServer_l9i.mcs.yml"><code>capabilities/tools/MicrosoftLearnDocsMCP-…_l9i.mcs.yml</code></a></td></tr>
-            <tr><td>Get admin digest subscriptions</td><td>Dataverse · List rows (fixed owner filter)</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/capabilities/tools/Listrowsfromselectedenvironment_Pkp.mcs.yml"><code>capabilities/tools/Listrows…_Pkp.mcs.yml</code></a></td></tr>
-            <tr><td>Create my admin digest subscription</td><td>Dataverse · Add a new row</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/capabilities/tools/Addanewrowtoselectedenvironment_c-_.mcs.yml"><code>capabilities/tools/Addanewrow…_c-_.mcs.yml</code></a></td></tr>
-            <tr><td>Update my admin digest subscription</td><td>Dataverse · Update a row</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/capabilities/tools/Updatearowinselectedenvironment_Ao0.mcs.yml"><code>capabilities/tools/Updatearow…_Ao0.mcs.yml</code></a></td></tr>
-            <tr><td>Daily-MC-Trigger</td><td>Agent flow: retrieve via agent → filter → render → deliver → record</td><td><span class="pill" style="--c:var(--warn);--cs:var(--learn-soft)">Orchestration</span></td><td>Solution package only</td></tr>
-            <tr><td>Admin Digest Subscriptions</td><td>Dataverse table (user-owned)</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">State</span></td><td>Solution package only</td></tr>
-            <tr><td>Admin Digest Subscriber / Processor</td><td>Security roles (user-level / organization-level)</td><td><span class="pill" style="--c:var(--data);--cs:var(--data-soft)">Security</span></td><td>Solution package only</td></tr>
-            <tr><td>Allowed Recipient Domains</td><td>Environment variable <code>sample_AllowedRecipientDomains</code> (set to your tenant's domains)</td><td><span class="pill" style="--c:var(--deliver);--cs:var(--deliver-soft)">Security</span></td><td>Solution package only</td></tr>
-            <tr><td>Shared Digest Team ID / Channel ID / Email Recipients</td><td>Environment variables <code>sample_SharedDigestTeamId</code>, <code>sample_SharedDigestChannelId</code>, <code>sample_SharedDigestRecipients</code> (default <code>none</code>)</td><td><span class="pill" style="--c:var(--warn);--cs:var(--learn-soft)">Mode 2</span></td><td>Solution package only</td></tr>
-            <tr><td>Custom connectors (2)</td><td>Enterprise and Release Communication MCP</td><td><span class="pill" style="--c:var(--enterprise);--cs:var(--enterprise-soft)">Connector</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/tree/main/connectors"><code>connectors/</code></a></td></tr>
-            <tr><td>Connection references (7)</td><td>Agent: Dataverse, Learn, Enterprise, Release · Flow: Copilot Studio, Dataverse, Teams, Outlook</td><td><span class="pill" style="--c:var(--muted);--cs:var(--bg)">Infra</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/tree/main/infrastructure/connections"><code>infrastructure/connections/</code></a></td></tr>
-            <tr><td>Importable solution</td><td>Unmanaged, <code>sample</code> publisher</td><td><span class="pill" style="--c:var(--muted);--cs:var(--bg)">Package</span></td><td><a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/solution/AdminUpdatesAgents_1_1_0_0.zip"><code>solution/AdminUpdatesAgents_1_1_0_0.zip</code></a></td></tr>
-          </tbody>
-        </table>
+    <section id="setup">
+      <p class="eyebrow">04 / setup</p>
+      <h2>Import, connect, test.</h2>
+      <p class="muted">The three MCP integrations still need access and authorization. There is no subscription data model or delivery pipeline to configure. Full steps are in <a href="../SETUP.md">SETUP.md</a>.</p>
+      <div class="panel">
+        <p id="checklistStatus" class="small" role="status">0 of 5 steps checked</p>
+        <div id="progress" class="progress" role="progressbar" aria-label="Setup checklist" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><div id="progressFill"></div></div>
+        <ul class="checklist">
+          <li><label><input type="checkbox"><span><strong>Prepare a development environment.</strong> Confirm Copilot Studio licensing, import permissions, and access to the evidence sources.</span></label></li>
+          <li><label><input type="checkbox"><span><strong>Verify and import the chat-only ZIP.</strong> Compare its SHA256 with the file from the same branch. Do not use GitHub's source ZIP.</span></label></li>
+          <li><label><input type="checkbox"><span><strong>Configure the three shared connections.</strong> Use your tenant's domain and OAuth configuration. Sign in to Enterprise as a dedicated service account, select Agent author authentication, and test each evidence source.</span></label></li>
+          <li><label><input type="checkbox"><span><strong>Select a supported model and test in chat.</strong> Try a product-specific briefing, all products, conflicting evidence, and denied access.</span></label></li>
+          <li><label><input type="checkbox"><span><strong>Publish and share deliberately.</strong> Configure your intended chat channels separately. No scheduled flow needs enabling.</span></label></li>
+        </ul>
+        <p class="small muted" style="margin:16px 0 0">Checklist progress lasts only while this page is open. It does not inspect or configure your environment.</p>
       </div>
+    </section>
+
+    <section id="boundaries">
+      <p class="eyebrow">05 / boundaries</p>
+      <h2>What this simplification does and does not change.</h2>
+      <details open><summary>Shared connections require restricted agent access</summary><p>The agent requires Microsoft sign-in and uses centrally managed Agent author authentication for all three MCP tools. Approved administrators can chat without Copilot Studio editing access or individual tool connections. They share the Enterprise service account's data access, not their individual tenant permissions. Restrict use to an approved administrator security group, keep credentials in an approved vault, and retain MFA and Conditional Access. Review actual connector and MCP permissions; research-only instructions do not reduce an overly broad permission grant.</p></details>
+      <details><summary>No custom subscription table is not the same as no Dataverse platform dependency</summary><p>The subscription data model is removed. Copilot Studio and its Power Platform environment still have their normal licensing and platform requirements.</p></details>
+      <details><summary>An old unmanaged installation is not automatically cleaned up</summary><p>Importing a smaller unmanaged package does not remove components already installed by the old digest solution. Turn off old scheduled flows, back up data, and review dependencies before removing old tables, roles, environment variables, or unused connections. See <a href="../SETUP.md#existing-digest-enabled-installations">the migration guidance</a>.</p></details>
+      <details><summary>Briefings are evidence-based, not a guarantee of exhaustive coverage</summary><p>The agent can only use the records the sources return. Responses should state the reporting period, unavailable sources, and retrieval limitations. Public roadmap information alone never establishes tenant impact.</p></details>
+      <details><summary>Viewing this HTML on GitHub</summary><p>GitHub's repository file view shows source code. Download and open this file locally to use the dashboard. Hosting it with GitHub Pages is a separate configuration step.</p></details>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap">
+      <p><a href="../README.md">Repository overview</a><a href="../SETUP.md">Setup guide</a><a href="../SECURITY.md">Security</a><a href="../LICENSE">MIT license</a></p>
+      <p>Admin Updates Agent. Independent community reference implementation. No external scripts, stylesheets, or data requests are required to render this page.</p>
     </div>
-  </section>
+  </footer>
+  <script>
+    (() => {
+      const themeButton = document.getElementById("themeButton");
+      function updateThemeButton() {
+        themeButton.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === "dark"));
+      }
+      themeButton.addEventListener("click", () => {
+        document.documentElement.dataset.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        updateThemeButton();
+      });
+      updateThemeButton();
 
-  <section id="deploy">
-    <h2><span class="num">07</span> Deployment checklist</h2>
-    <p class="lead">Progress is saved in this browser only. Full details are in <a href="https://github.com/saurabhkoshta/Admin-Updates-Agents/blob/main/SETUP.md">SETUP.md</a>.</p>
-    <div class="panel">
-      <div class="progress" aria-hidden="true"><div id="progBar"></div></div>
-      <ul class="checklist" id="checklist">
-        <li><label><input type="checkbox" data-k="c1"><span>Create or pick a <strong>development</strong> Power Platform environment</span></label></li>
-        <li><label><input type="checkbox" data-k="c2"><span>Verify the ZIP against <code>solution/SHA256SUMS.txt</code></span></label></li>
-        <li><label><input type="checkbox" data-k="c3"><span>Import the solution through Power Apps → Solutions → Import (or <code>pac solution import</code>)</span></label></li>
-        <li><label><input type="checkbox" data-k="c11"><span>Set <strong>Allowed Recipient Domains</strong> (<code>sample_AllowedRecipientDomains</code>) to <strong>your tenant's email domains</strong>, for example <code>contoso.com;contoso.onmicrosoft.com</code></span></label></li>
-        <li><label><input type="checkbox" data-k="c12"><span>Choose the usage mode: for an all-updates shared digest, set the <strong>Shared Digest</strong> team/channel and/or email variables; for personalized-only, leave them as <code>none</code></span></label></li>
-        <li><label><input type="checkbox" data-k="c4"><span>Replace the Enterprise connector's placeholder tenant ID and federated identity subject</span></label></li>
-        <li><label><input type="checkbox" data-k="c5"><span>Create and bind all connections. The digest flow's Dataverse, Copilot Studio, Teams, and Outlook connections belong to a dedicated digest account.</span></label></li>
-        <li><label><input type="checkbox" data-k="c6"><span>Assign <strong>Admin Digest Subscriber</strong> to agent users (personalized mode) and <strong>Admin Digest Processor</strong> to the digest account only</span></label></li>
-        <li><label><input type="checkbox" data-k="c7"><span>Select a model available in the environment and revalidate the agent</span></label></li>
-        <li><label><input type="checkbox" data-k="c8"><span>Run the test scenarios: lookups, past-due roadmap, conflicts, subscription CRUD and preview, delivery modes, external recipients skipped, denial cases</span></label></li>
-        <li><label><input type="checkbox" data-k="c9"><span>Review the <code>Daily-MC-Trigger</code> recurrence, run it once manually in dev, check Last Delivery Status, then turn it on</span></label></li>
-        <li><label><input type="checkbox" data-k="c10"><span>Publish the agent deliberately and share it with the intended group</span></label></li>
-      </ul>
-    </div>
-  </section>
+      const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+      function selectTab(tab) {
+        tabs.forEach(candidate => {
+          const selected = candidate === tab;
+          candidate.setAttribute("aria-selected", String(selected));
+          candidate.tabIndex = selected ? 0 : -1;
+          document.getElementById(candidate.getAttribute("aria-controls")).hidden = !selected;
+        });
+      }
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => selectTab(tab));
+        tab.addEventListener("keydown", event => {
+          let next;
+          if (event.key === "ArrowRight") next = tabs[(index + 1) % tabs.length];
+          if (event.key === "ArrowLeft") next = tabs[(index + tabs.length - 1) % tabs.length];
+          if (event.key === "Home") next = tabs[0];
+          if (event.key === "End") next = tabs[tabs.length - 1];
+          if (next) {
+            event.preventDefault();
+            selectTab(next);
+            next.focus();
+          }
+        });
+      });
 
-  <section id="gaps">
-    <h2><span class="num">08</span> Known gaps and next steps</h2>
-    <div class="grid-3">
-      <div class="panel gap" style="--c:var(--warn)"><div class="sev">Scheduling</div><h3>Per-subscription schedule isn't honored</h3><p>The flow runs once a week (Monday 08:00 Central) for every active subscription. The stored day and time are preferences only. An hourly trigger that selects due rows would honor each schedule.</p></div>
-      <div class="panel gap" style="--c:var(--warn)"><div class="sev">Retrieval</div><h3>Post retrieval still goes through the model</h3><p>The flow filters and renders deterministically, but it relies on the agent returning every post the Graph request returned. A post the model omits can't be recovered. Spot-check against Message Center.</p></div>
-      <div class="panel gap" style="--c:var(--ok)"><div class="sev">Resolved</div><h3>Owner scope, delivery scope, determinism</h3><p>Fixed owner filter and Subscriber/Processor roles; no agent delivery tools; tenant domain allowlist; deterministic filter, sort, and card template in the flow.</p></div>
-      <div class="panel gap" style="--c:var(--accent)"><div class="sev">Quality</div><h3>No evaluation set</h3><p>Add a Copilot Studio test set that covers the SETUP.md scenarios, and run it before each release.</p></div>
-      <div class="panel gap" style="--c:var(--accent)"><div class="sev">ALM</div><h3>Flow and table are ZIP-only</h3><p>Unpack the solution into source (<code>pac solution unpack</code>) and add CI that packs, checks, and hashes the ZIP.</p></div>
-    </div>
-  </section>
+      const inventoryFilter = document.getElementById("inventoryFilter");
+      const inventoryRows = Array.from(document.querySelectorAll("#inventoryRows tr"));
+      inventoryFilter.addEventListener("input", () => {
+        const query = inventoryFilter.value.trim().toLowerCase();
+        inventoryRows.forEach(row => { row.hidden = !row.textContent.toLowerCase().includes(query); });
+        document.getElementById("inventoryCount").textContent = `${inventoryRows.filter(row => !row.hidden).length} of ${inventoryRows.length} components shown`;
+      });
 
-  <footer>Admin Updates Agent · MIT License · Community reference implementation, not a Microsoft product</footer>
-</main>
-
-<script>
-(() => {
-  const root = document.documentElement;
-  const saved = localStorage.getItem("aua-theme");
-  if (saved) root.dataset.theme = saved;
-  else if (matchMedia("(prefers-color-scheme: dark)").matches) root.dataset.theme = "dark";
-  document.getElementById("themeBtn").addEventListener("click", () => {
-    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
-    localStorage.setItem("aua-theme", root.dataset.theme);
-  });
-
-  const tabs = [...document.querySelectorAll('[role="tab"]')];
-  const select = (tab) => {
-    tabs.forEach(t => {
-      const on = t === tab;
-      t.setAttribute("aria-selected", on);
-      t.tabIndex = on ? 0 : -1;
-      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
-    });
-  };
-  tabs.forEach((t, i) => {
-    t.addEventListener("click", () => select(t));
-    t.addEventListener("keydown", (e) => {
-      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-      if (d) { const n = tabs[(i + d + tabs.length) % tabs.length]; select(n); n.focus(); }
-    });
-  });
-
-  const filter = document.getElementById("invFilter");
-  const rows = [...document.querySelectorAll("#invTable tbody tr")];
-  filter.addEventListener("input", () => {
-    const q = filter.value.trim().toLowerCase();
-    rows.forEach(r => { r.hidden = q && !r.textContent.toLowerCase().includes(q); });
-  });
-
-  const boxes = [...document.querySelectorAll("#checklist input")];
-  const state = JSON.parse(localStorage.getItem("aua-checklist") || "{}");
-  const bar = document.getElementById("progBar");
-  const update = () => { bar.style.width = (boxes.filter(b => b.checked).length / boxes.length * 100) + "%"; };
-  boxes.forEach(b => {
-    b.checked = !!state[b.dataset.k];
-    b.addEventListener("change", () => { state[b.dataset.k] = b.checked; localStorage.setItem("aua-checklist", JSON.stringify(state)); update(); });
-  });
-  update();
-})();
-</script>
+      const checklist = Array.from(document.querySelectorAll(".checklist input"));
+      checklist.forEach(box => box.addEventListener("change", () => {
+        const count = checklist.filter(input => input.checked).length;
+        document.getElementById("checklistStatus").textContent = `${count} of ${checklist.length} steps checked`;
+        document.getElementById("progress").setAttribute("aria-valuenow", String(count));
+        document.getElementById("progressFill").style.width = `${count / checklist.length * 100}%`;
+      }));
+    })();
+  </script>
 </body>
 </html>
